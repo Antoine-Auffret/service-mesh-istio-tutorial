@@ -16,6 +16,8 @@
 
 2) Objectifs du tutoriel - contexte, description et résultats/connaisses  attendus après  l’exécution
 
+Before you can install Istio, you need a cluster running a compatible version of Kubernetes. Istio 1.4 has been tested with Kubernetes releases 1.13, 1.14, 1.15.
+
 3) Description en détail de tous les configurations  et pas à suivre
 
 4) Les code source et scripts élabore. 
