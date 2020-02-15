@@ -66,7 +66,7 @@ Appuyer sur bouton "Créer"
 
 Pour accéder à la console (shell) cliquer sur l'icone en haut à doite
 
-![](img/cloudShellIcon.img)
+![](img/cloudShellIcon.png)
 
 Vérifier l'état du cluster dans la console
 ```
