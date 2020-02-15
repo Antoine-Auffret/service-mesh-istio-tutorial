@@ -28,18 +28,39 @@ Before you can install Istio, you need a cluster running a compatible version of
 
 ### Configuration Google Cloud GKE (Google Kubernetes Engine)
 
+Créer un compte Google : https://accounts.google.com/signup
+
+Connecter vous sur le cloud de Google : https://console.cloud.google.com
+
+Activer votre compte cloud gratuitement (300$ de crédits offert ou pendant 1 an)
+
+Créer un nouveau projet
+
+#### Créer un nouveau cluster Kubernetes
+
 ![](img/createClusterButton.png)
 
-Modèle 'Cluster standard' (modifié) 
+Modèle 'Cluster standard' (modifié)
 
-Version maître : 1.15.7-gke.23
+![](img/createClusterStandard1.png)
 
-Nombre de nœuds : 4
+Nom : istio-demo
+
+Version maître (Kubernetes) : 1.15.7-gke.23
+
+![](img/createClusterStandard2.png)
+
+Nombre de nœuds : 4 (nécessaire pour tester toutes les fonctionnalités d'Istio)
 
 Type de machine : n1-standard-1
 
-Disponibilité, mise en réseau, sécurité et autres fonctionnalités 
-Activer Istio (bêta)
+> Il est possible d'activer Istio à la création du cluster dans l'onglet "Disponibilité, mise en réseau, sécurité et autres fonctionnalités" puis "Activer Istio (bêta)". Pour ce tutoriel nous allons installer Istio à la main pour comprendre son fonctionnement.
+
+Appuyer sur bouton "Créer"
+
+> Le cluster peut mettre plusieurs minutes à se créer
+
+![](img/clusterList.png)
 
 ```
 gcloud container clusters list
