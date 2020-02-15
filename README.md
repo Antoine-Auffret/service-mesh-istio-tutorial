@@ -77,6 +77,37 @@ cp tools/istioctl.bash ~/.
 source ~/istioctl.bash
 ```
 
+Perform pre-check for your cluster and report whether the cluster is ready for Istio installation
+```
+istioctl verify-install
+```
+
+Choose the profile you want to install
+
+<i></i>|default|demo|minimal|sds|remote
+---|:---:|:---:|:---:|:---:|:---:
+**Corecomponents**|   |   |   |   |   
+`istio-citadel`| x | x |   | x | x 
+`istio-egressgateway`|   | x |   |   |   
+`istio-galley`| x | x |   | x |   
+`istio-ingressgateway`| x | x |   | x |   
+`istio-nodeagent`|   |   |   | x |   
+`istio-pilot`| x | x | x | x |   
+`istio-policy`| x | x |   | x |   
+`istio-sidecar-injector`| x | x |   | x | x 
+`istio-telemetry`| x | x |   | x |   
+**Addons**|   |   |   |   |   
+`grafana`|   | x |   |   |   
+`istio-tracing`|   | x |   |   |   
+`kiali`|   | x |   |   |   
+`prometheus`| x | x |   | x |   
+
+Install the built-in configuration profile demo to test all the features of Istio
+```
+istioctl manifest apply --set profile=demo
+```
+
+
 ## 3) Description en détail de tous les configurations  et pas à suivre
 
 ## 4) Les code source et scripts élabore. 
