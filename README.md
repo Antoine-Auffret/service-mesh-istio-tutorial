@@ -99,27 +99,30 @@ Your active configuration is: [cloudshell-26194]
 clusterrolebinding.rbac.authorization.k8s.io/cluster-admin-binding created
 ```
 
-### Install Istio
+### Installation d'Istio
 
+Télécharger Istio dans le répertoire home du cluster
 ```
-curl -L https://istio.io/downloadIstio | sh -
-```
-
-```
-cd istio-1.4.4
+$ curl -L https://istio.io/downloadIstio | sh -
 ```
 
+Ajouter la commande `istioctl` à la variable d'environnement PATH (en remplaçant a_y_auffret par votre nom)
 ```
-mv bin/istioctl /usr/local/bin
+$ export PATH="$PATH:/home/a_y_auffret/istio-1.4.4/bin"
+```
+
+Lancer la vérification de pré-installation d'Istio pour savoir si le cluster est prêt à installer Istio
+```
+$ istioctl verify-install
+Install Pre-Check passed! The cluster is ready for Istio installation.
 ```
 
 Enabling auto-completion
 ```
-cp tools/istioctl.bash ~/.
+$ cp ~/istio-1.4.4/tools/istioctl.bash ~/.
 ```
-
 ```
-source ~/istioctl.bash
+$ source ~/istioctl.bash
 ```
 
 Perform pre-check for your cluster and report whether the cluster is ready for Istio installation
