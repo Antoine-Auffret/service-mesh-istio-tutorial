@@ -18,7 +18,28 @@
 
 Before you can install Istio, you need a cluster running a compatible version of Kubernetes. Istio 1.4 has been tested with Kubernetes releases 1.13, 1.14, 1.15.
 
+**Google Cloud** = n1-standard-1 (4 nodes)
+
+**Cluster Kubernetes** = 1.15.7-gke.23
+
+**Istio** = 1.4.4
+
+## 3) Description en détail de tous les configurations  et pas à suivre
+
 ### Configuration Google Cloud GKE (Google Kubernetes Engine)
+
+![](img/createClusterButton.png)
+
+Modèle 'Cluster standard' (modifié) 
+
+Version maître : 1.15.7-gke.23
+
+Nombre de nœuds : 4
+
+Type de machine : n1-standard-1
+
+Disponibilité, mise en réseau, sécurité et autres fonctionnalités 
+Activer Istio (bêta)
 
 ```
 gcloud container clusters list
@@ -107,8 +128,15 @@ Install the built-in configuration profile demo to test all the features of Isti
 istioctl manifest apply --set profile=demo
 ```
 
+Test dashboard (Web UI)
+```
+istioctl dashboard
+```
 
-## 3) Description en détail de tous les configurations  et pas à suivre
+Choose one
+```
+istioctl dashboard grafana
+```
 
 ## 4) Les code source et scripts élabore. 
 
