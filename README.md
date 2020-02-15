@@ -36,11 +36,11 @@ Activer votre compte cloud gratuitement (300$ de crédits offert ou pendant 1 an
 
 Créer un nouveau projet
 
-#### Créer un nouveau cluster Kubernetes
+### Créer un nouveau cluster Kubernetes
 
 ![](img/createClusterButton.png)
 
-Modèle 'Cluster standard' (modifié)
+Choisir un modèle 'Cluster standard'
 
 ![](img/createClusterStandard1.png)
 
@@ -62,38 +62,41 @@ Appuyer sur bouton "Créer"
 
 ![](img/clusterList.png)
 
+### Vérification de l'installation et configuration du cluster Kubernetes
+
+Pour accéder à la console (shell) cliquer sur l'icone en haut à doite
+
+![](img/cloudShellIcon.img)
+
+Vérifier l'état du cluster dans la console
 ```
-gcloud container clusters list
+$ gcloud container clusters list
+NAME        LOCATION       MASTER_VERSION  MASTER_IP     MACHINE_TYPE   NODE_VERSION   NUM_NODES  STATUS
+istio-demo  us-central1-a  1.15.7-gke.23   35.238.31.56  n1-standard-1  1.15.7-gke.23  4          RUNNING
 ```
 
+Obtener les informations d'identification de votre cluster afin de pouvoir interagir avec lui avec la commande `kubectl`.
+Préciser la zone (LOCATION) de votre cluster, ici `us-central1-a`.
 ```
-gcloud container clusters get-credentials CLUSTER_NAME
-```
-
-```
-kubectl get service -n istio-system
-```
-
-```
-kubectl get pods -n istio-system
+$ gcloud container clusters get-credentials istio-demo --zone us-central1-a
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for istio-demo.
 ```
 
+Vérifier la version de Kubernetes
 ```
-kubectl label namespace istio-system istio-injection=enabled --overwrite=true
-```
-
-Retrieve your credentials for ```kubectl```.
-```
-gcloud container clusters get-credentials <cluster-name> \
-    --zone <zone> \
-    --project <project-id>
+$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"15", GitVersion:"v1.15.9", GitCommit:"2e808b7cb054ee242b68e62455323aa783991f03", GitTreeState:"clean", BuildDate:"2020-01-18T23:33:14Z", GoVersion:"go1.12.12", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"15+", GitVersion:"v1.15.7-gke.23", GitCommit:"06e05fd0390a51ea009245a90363f9161b6f2389", GitTreeState:"clean", BuildDate:"2020-01-17T23:10:45Z", GoVersion:"go1.12.12b4", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
-Grant cluster administrator (admin) permissions to the current user. To create the necessary RBAC rules for Istio, the current user requires admin permissions.
+Accordez des autorisations d'administrateur de cluster (admin) à l'utilisateur actuel. Pour créer les règles nécessaires pour Istio, l'utilisateur actuel nécessite des autorisations d'administrateur.
 ```
-kubectl create clusterrolebinding cluster-admin-binding \
+$ kubectl create clusterrolebinding cluster-admin-binding \
     --clusterrole=cluster-admin \
     --user=$(gcloud config get-value core/account)
+Your active configuration is: [cloudshell-26194]
+clusterrolebinding.rbac.authorization.k8s.io/cluster-admin-binding created
 ```
 
 ### Install Istio
