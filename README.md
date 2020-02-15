@@ -55,6 +55,7 @@ kubectl create clusterrolebinding cluster-admin-binding \
 ```
 
 ### Install Istio
+
 ```
 curl -L https://istio.io/downloadIstio | sh -
 ```
@@ -64,7 +65,7 @@ cd istio-1.4.4
 ```
 
 ```
-export PATH=$PWD/bin:$PATH
+mv bin/istioctl /usr/local/bin
 ```
 
 Enabling auto-completion
