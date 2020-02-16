@@ -83,6 +83,14 @@ Fetching cluster endpoint and auth data.
 kubeconfig entry generated for istio-demo.
 ```
 
+Activer l'auto-completion pour la commande `kubectl`
+```
+$ kubectl completion bash > ~/kubectl.bash
+```
+```
+$ source ~/kubectl.bash
+```
+
 Vérifier la version de Kubernetes
 ```
 $ kubectl version
@@ -111,13 +119,7 @@ Ajouter la commande `istioctl` à la variable d'environnement PATH (en remplaça
 $ export PATH="$PATH:/home/a_y_auffret/istio-1.4.4/bin"
 ```
 
-Lancer la vérification de pré-installation d'Istio pour savoir si le cluster est prêt à installer Istio
-```
-$ istioctl verify-install
-Install Pre-Check passed! The cluster is ready for Istio installation.
-```
-
-Enabling auto-completion
+Activer l'auto-completion pour la commande `istioctl`
 ```
 $ cp ~/istio-1.4.4/tools/istioctl.bash ~/.
 ```
@@ -125,12 +127,14 @@ $ cp ~/istio-1.4.4/tools/istioctl.bash ~/.
 $ source ~/istioctl.bash
 ```
 
-Perform pre-check for your cluster and report whether the cluster is ready for Istio installation
+Lancer la vérification de pré-installation d'Istio pour savoir si le cluster est prêt à installer Istio
 ```
-istioctl verify-install
+$ istioctl verify-install
+Install Pre-Check passed! The cluster is ready for Istio installation.
 ```
 
-Choose the profile you want to install
+Plusieurs profils d'installation d'Istio sont disponibles (voir le tableau ci-dessous).
+Pour ce tutoriel, nous allons installer le profil "demo" car celui-ci permet de tester toutes les fonctionnalités d'Istio
 
 <i></i>|default|demo|minimal|sds|remote
 ---|:---:|:---:|:---:|:---:|:---:
@@ -150,20 +154,73 @@ Choose the profile you want to install
 `kiali`|   | x |   |   |   
 `prometheus`| x | x |   | x |   
 
-Install the built-in configuration profile demo to test all the features of Istio
+Installer le profil "demo"
 ```
-istioctl manifest apply --set profile=demo
-```
-
-Test dashboard (Web UI)
-```
-istioctl dashboard
+$ istioctl manifest apply --set profile=demo
 ```
 
-Choose one
+Vérifier l'installation en vous assurant que les services Kubernetes suivants sont déployés et vérifiez qu'ils ont tous un CLUSTER-IP approprié, à l'exception du service `jaeger-agent`
 ```
-istioctl dashboard grafana
+$ kubectl get service -n istio-system
+NAME                     TYPE           CLUSTER-IP    EXTERNAL-IP     PORT(S)                                                                                                                      AGE
+grafana                  ClusterIP      10.0.12.82    <none>          3000/TCP                                                                                                                     2m9s
+istio-citadel            ClusterIP      10.0.12.52    <none>          8060/TCP,15014/TCP                                                                                                           2m11s
+istio-egressgateway      ClusterIP      10.0.11.249   <none>          80/TCP,443/TCP,15443/TCP                                                                                                     2m10s
+istio-galley             ClusterIP      10.0.15.206   <none>          443/TCP,15014/TCP,9901/TCP,15019/TCP                                                                                         2m11s
+istio-ingressgateway     LoadBalancer   10.0.13.178   35.222.49.120   15020:31102/TCP,80:30629/TCP,443:31990/TCP,15029:31705/TCP,15030:32305/TCP,15031:32618/TCP,15032:32128/TCP,15443:31641/TCP   2m10s
+istio-pilot              ClusterIP      10.0.3.93     <none>          15010/TCP,15011/TCP,8080/TCP,15014/TCP                                                                                       2m11s
+istio-policy             ClusterIP      10.0.0.9      <none>          9091/TCP,15004/TCP,15014/TCP                                                                                                 2m11s
+istio-sidecar-injector   ClusterIP      10.0.13.92    <none>          443/TCP                                                                                                                      2m10s
+istio-telemetry          ClusterIP      10.0.6.143    <none>          9091/TCP,15004/TCP,15014/TCP,42422/TCP                                                                                       2m6s
+jaeger-agent             ClusterIP      None          <none>          5775/UDP,6831/UDP,6832/UDP                                                                                                   2m17s
+jaeger-collector         ClusterIP      10.0.9.110    <none>          14267/TCP,14268/TCP,14250/TCP                                                                                                2m17s
+jaeger-query             ClusterIP      10.0.12.140   <none>          16686/TCP                                                                                                                    2m16s
+kiali                    ClusterIP      10.0.8.83     <none>          20001/TCP                                                                                                                    2m11s
+prometheus               ClusterIP      10.0.3.108    <none>          9090/TCP                                                                                                                     2m16s
+tracing                  ClusterIP      10.0.1.253    <none>          80/TCP                                                                                                                       2m16s
+zipkin                   ClusterIP      10.0.2.15     <none>          9411/TCP                                                                                                                     2m16s
 ```
+
+Assurez-vous également que les modules Kubernetes correspondants sont déployés et ont un STATUS "Running"
+```
+$ kubectl get pods -n istio-system
+NAME                                      READY   STATUS    RESTARTS   AGE
+grafana-6c8f45499-wkfjc                   1/1     Running   0          5m31s
+istio-citadel-db8578cc4-vn7xt             1/1     Running   0          5m33s
+istio-egressgateway-f9c7b6669-pl4xl       1/1     Running   0          5m36s
+istio-galley-786ff7f89b-wvqgk             1/1     Running   0          5m33s
+istio-ingressgateway-5654f8bf65-fnv2g     1/1     Running   0          5m37s
+istio-pilot-c565b478c-vm7gd               1/1     Running   0          5m34s
+istio-policy-7d5f97776c-bbxpv             1/1     Running   2          5m33s
+istio-sidecar-injector-85577d99c6-glzmd   1/1     Running   0          5m32s
+istio-telemetry-55dd49cf85-mzwl8          1/1     Running   3          5m33s
+istio-tracing-78548677bc-gcgfk            1/1     Running   0          5m38s
+kiali-fb5f485fb-87qhs                     1/1     Running   0          5m32s
+prometheus-685585888b-8dhsb               1/1     Running   0          5m37s
+```
+
+Lorsque vous déployez votre application à l'aide de `kubectl apply`, l'injecteur sidecar d'Istio injectera automatiquement les conteneurs Envoy dans les pods d'applications s'ils sont démarrés dans des namespace étiquetés avec istio-injection=enabled
+```
+$ kubectl label namespace default istio-injection=enabled
+namespace/default labeled
+```
+```
+$ kubectl get namespace -L istio-injection
+NAME              STATUS   AGE    ISTIO-INJECTION
+default           Active   127m   enabled
+istio-system      Active   32m    disabled
+kube-node-lease   Active   127m
+kube-public       Active   127m
+kube-system       Active   127m
+```
+
+Vous pouvez lancer un dashboard (Web UI) comme grafana pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un navigateur
+```
+$ istioctl dashboard grafana
+http://localhost:40939
+```
+
+### Installation d'une application
 
 ## 4) Les code source et scripts élabore. 
 
