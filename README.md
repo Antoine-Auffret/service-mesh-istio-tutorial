@@ -354,13 +354,13 @@ destinationrule.networking.istio.io/details created
 
 > Remarque : l'application bookinfo utilise un load balancer pour les 3 microservices `reviews`, il suffit de rafraîchir plusieurs fois la page pour voir que les système de notation diffère d'un microservice à un autre (pas d'étoile, étoiles noires ou étoiles rouges). Cela permet à Istio de rediriger le traffic vers différents microservices selon des règles préétablies. C'est l'une des fonctionnalités principales d'Istio le "**traffic management**" (https://istio.io/docs/concepts/traffic-management)
 
-Vous pouvez lancer grafana pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un navigateur et aller sur le dashboard "Istio Service Dashboard". Ce dashboad surveille les activités des services notament l'application bookinfo (http://35.222.49.120/productpage). Rafraîchisser plusieurs fois l'application bookinfo pour voir évoluer les graphiques (2.1 opérations par seconde). `Ctrl-C` pour terminer grafana.
+Vous pouvez lancer grafana pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un navigateur et aller sur le dashboard "Istio Workload Dashboard" (onglet "Home" puis "Istio"), changer le namespace (default) et le workload (productpage-v1). Ce dashboad surveille les activités du cluster notament l'application bookinfo (http://35.222.49.120/productpage). Rafraîchisser plusieurs fois l'application bookinfo pour voir évoluer les graphiques (ici 0.47 opération par seconde). `Ctrl-C` pour terminer grafana.
 ```
 $ istioctl dashboard grafana
 http://localhost:40939
 ```
 
-![](img/grafanaServiceDashboard.png)
+![](img/grafanaWorkloadDashboard.png)
 
 <a name="code"></a>
 
