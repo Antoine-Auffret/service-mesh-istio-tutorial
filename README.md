@@ -138,9 +138,9 @@ Install Pre-Check passed! The cluster is ready for Istio installation.
 Plusieurs profils d'installation d'Istio sont disponibles (voir le tableau ci-dessous).
 Pour ce tutoriel, nous allons installer le profil "demo" car celui-ci permet de tester toutes les fonctionnalités d'Istio
 
-<i></i>|default|demo|minimal|sds|remote
+Services istio-system / profil|default|demo|minimal|sds|remote
 ---|:---:|:---:|:---:|:---:|:---:
-**Corecomponents**|   |   |   |   |   
+**Composants principaux**|   |   |   |   |   
 `istio-citadel`| x | x |   | x | x 
 `istio-egressgateway`|   | x |   |   |   
 `istio-galley`| x | x |   | x |   
@@ -150,7 +150,7 @@ Pour ce tutoriel, nous allons installer le profil "demo" car celui-ci permet de 
 `istio-policy`| x | x |   | x |   
 `istio-sidecar-injector`| x | x |   | x | x 
 `istio-telemetry`| x | x |   | x |   
-**Addons**|   |   |   |   |   
+**Extensions**|   |   |   |   |   
 `grafana`|   | x |   |   |   
 `istio-tracing`|   | x |   |   |   
 `kiali`|   | x |   |   |   
@@ -224,6 +224,63 @@ http://localhost:40939
 
 ### Installation d'une application
 
-## 4) Les code source et scripts élabore. 
+L'application "bookinfo" déploie un exemple d'application composé de quatre microservices distincts utilisés pour démontrer diverses fonctionnalités d'Istio. L'application affiche des informations sur un livre, semblable à une entrée de catalogue unique d'une librairie en ligne. La page affiche une description du livre, les détails du livre et quelques avis sur le livre.
+
+L'application Bookinfo est divisée en quatre microservices distincts :
+* `productpage` : Le microservice de la page produit appelle les détails et examine les microservices pour remplir la page.
+* `details` : Le microservice de détails contient des informations sur le livre.
+* `reviews` : Le microservice des avis contient des critiques de livres. Il appelle également le microservice `ratings`.
+* `ratings` : Le microservice de notation contient des informations sur la notes des livres qui accompagnent une critique de livre.
+
+Il y a 3 versions du microservice `reviews` :
+* Version v1 n'appelle pas le service de notation `ratings`.
+* Version v2 appelle le service de notation `ratings` et affiche chaque note de 1 à 5 étoiles noires.
+* Version v3 appelle le service de notation `ratings` et affiche chaque note de 1 à 5 étoiles rouges.
+
+L'architecture de l'application est présentée ci-dessous.
+
+![](img/bookinfoIstio.svg)
+
+Déployer l'application bookinfo
+```
+$ kubectl apply -f istio-1.4.4/samples/bookinfo/platform/kube/bookinfo.yaml
+service/details created
+serviceaccount/bookinfo-details created
+deployment.apps/details-v1 created
+service/ratings created
+serviceaccount/bookinfo-ratings created
+deployment.apps/ratings-v1 created
+service/reviews created
+serviceaccount/bookinfo-reviews created
+deployment.apps/reviews-v1 created
+deployment.apps/reviews-v2 created
+deployment.apps/reviews-v3 created
+service/productpage created
+serviceaccount/bookinfo-productpage created
+deployment.apps/productpage-v1 created
+```
+
+Confirmer que tous les services et pods sont correctement définis et fonctionnent
+```
+$ kubectl get services
+NAME          TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)    AGE
+details       ClusterIP   10.0.7.43     <none>        9080/TCP   71s
+kubernetes    ClusterIP   10.0.0.1      <none>        443/TCP    4h47m
+productpage   ClusterIP   10.0.3.120    <none>        9080/TCP   69s
+ratings       ClusterIP   10.0.11.34    <none>        9080/TCP   70s
+reviews       ClusterIP   10.0.12.130   <none>        9080/TCP   70s
+```
+```
+$ kubectl get pods
+NAME                              READY   STATUS    RESTARTS   AGE
+details-v1-74f858558f-m4tgw       2/2     Running   0          101s
+productpage-v1-8554d58bff-6x8fg   2/2     Running   0          100s
+ratings-v1-7855f5bcb9-76426       2/2     Running   0          101s
+reviews-v1-59fd8b965b-jmgbs       2/2     Running   0          101s
+reviews-v2-d6cfdb7d6-nk2j9        2/2     Running   0          101s
+reviews-v3-75699b5cfb-gq8h7       2/2     Running   0          101s
+```
+
+## 4) Les code source et scripts élabore.
 
 ## 5) Diapos de votre présentation en PDF.
