@@ -12,6 +12,8 @@
 
 **Sidecar proxy** = network communication between microservices
 
+**Ingress gateway** = make the application accessible from outside of the Kubernetes cluster
+
 **Platform support** = Spanning Cloud, on-premise, Kubernetes, Mesos, and more
 
 ## 2) Objectifs du tutoriel - contexte, description et résultats/connaisses  attendus après  l’exécution
