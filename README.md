@@ -261,7 +261,7 @@ L'architecture de l'application est présentée ci-dessous.
 
 Déployer l'application bookinfo
 ```
-$ kubectl apply -f istio-1.4.4/samples/bookinfo/platform/kube/bookinfo.yaml
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/platform/kube/bookinfo.yaml
 service/details created
 serviceaccount/bookinfo-details created
 deployment.apps/details-v1 created
@@ -299,7 +299,51 @@ reviews-v2-d6cfdb7d6-nk2j9        2/2     Running   0          101s
 reviews-v3-75699b5cfb-gq8h7       2/2     Running   0          101s
 ```
 
+Vérifier maintenant que l'application fonctionne correctement à l'intérieur du cluster en se connectant à l'un des pods du cluster, par exemple `ratings-v1-7855f5bcb9-76426`
+```
+$ kubectl exec -it ratings-v1-7855f5bcb9-76426 bash
+root@ratings-v1-7855f5bcb9-76426:/opt/microservices#
+```
+
+Récupérer le titre de la page web de l'application avec l'URL http://productpage et le port 9080
+```
+# curl -s http://productpage:9080/productpage | grep "<title>"
+    <title>Simple Bookstore App</title>
+```
+Ctrl-D pour sortir du pod
+```
+Ctrl-D
+```
+
+Pour accéder à l'application à l'extérieur du cluster, vous devez configurer une passerelle (gateway)
+```
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/bookinfo-gateway.yaml
+gateway.networking.istio.io/bookinfo-gateway created
+virtualservice.networking.istio.io/bookinfo created
+```
+
+Vérifier l'installation de la gateway bookinfo
+```
+$ kubectl get gateways
+NAME               AGE
+bookinfo-gateway   3m30s
+```
+
+Récupérer l'adresse IP (EXTERNAL-IP) de la gateway
+```
+$ kubectl get service istio-ingressgateway -n istio-system
+NAME                   TYPE           CLUSTER-IP    EXTERNAL-IP     PORT(S)                                                                                                                      AGE
+istio-ingressgateway   LoadBalancer   10.0.13.178   35.222.49.120   15020:31102/TCP,80:30629/TCP,443:31990/TCP,15029:31705/TCP,15030:32305/TCP,15031:32618/TCP,15032:32128/TCP,15443:31641/TCP   4h55m
+```
+
+Ouvrir un navigateur web et accéder à l'URL avec l'adresse IP : http://35.222.49.120/productpage
+
+![](img/productpage.png)
+
+> Remarque : l'application bookinfo utilise un load balancer pour les 3 microservices `reviews`, il suffit de rafraîchir plusieurs fois la page pour voir que les système de notation diffère d'un microservice à un autre (pas d'étoile, étoiles noires ou étoiles rouges). Cela permet à Istio de rediriger le traffic vers différents microservices selon des règles préétablies. C'est l'une des fonctionnalités principales d'Istio le "**traffic management**" (https://istio.io/docs/concepts/traffic-management)
+
 <a name="code"></a>
+
 ## 4) Les code source et scripts élabore.
 
 <a name="diapo"></a>
