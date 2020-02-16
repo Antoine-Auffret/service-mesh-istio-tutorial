@@ -1,19 +1,14 @@
-# Service mesh with Istio : tutorial
+# Service mesh with Istio : Tutoriel
+
+------
 
 ## Sommaire
-1. [Présentation de la technologie](#presentation)
-2. [Objectifs du tutoriel - contexte, description et résultats/connaisses attendus après l’exécution](#objectifs)
-3. [Description en détail de tous les configurations et pas à suivre](#tutoriel)
-    1. [Configuration Google Cloud GKE (Google Kubernetes Engine)](#GKE)
-    2. [Créer un nouveau cluster Kubernetes](#createCluster)
-    3. [Vérification de l'installation et configuration du cluster Kubernetes](#verificationCluster)
-    4. [Installation d'Istio](#installationIstio)
-    5. [Installation d'une application avec Istio](#installationBookinfo)
-    6. [Traffic management](#traffic)
-4. [Les code source et scripts élabore](#code)
-5. [Diapos de votre présentation en PDF](#diapo)
 
+[TOC]
+
+------
 <a name="presentation"></a>
+
 ## 1) Présentation de la technologie
 
 **Service mesh** = Network of microservices
@@ -30,20 +25,29 @@
 
 **Platform support** = Spanning Cloud, on-premise, Kubernetes, Mesos, and more
 
+------
 <a name="objectifs"></a>
 ## 2) Objectifs du tutoriel - contexte, description et résultats/connaisses  attendus après  l’exécution
 
-Before you can install Istio, you need a cluster running a compatible version of Kubernetes. Istio 1.4 has been tested with Kubernetes releases 1.13, 1.14, 1.15.
+L'objectif de ce tutoriel est de comprendre le contexte du maillage de service (service mesh) en particulier Istio (https://istio.io). Pour cela vous allez installer Istio dans un cluster Kubernetes (https://kubernetes.io) sur le cloud de Google avec GKE (Google Kubernetes Engine). Ce tutoriel vous montrera aussi les principales fonctionnalités d'Istio sous la forme d'exemples facile à comprendre.
 
-**Google Cloud** = n1-standard-1 (4 nodes)
+Après ce tutoriel vous serez capable de déployer une application sur Kubernetes avec Istio et d'activer certaines fonctionnalités clés d'Istio comme la gestion du trafic, la sécurité, des politiques et de l'observabilité.
+
+Pour ce tutoriel il est recommandé d'avoir des connaissances de Linux (Debian) et de connaître les grands principes de la conteneurisation (Docker et Kubernetes).
+
+Au cours de ce tutoriel vous installerez :
+
+**Google Cloud** = n1-standard-1 (4 nœuds/machines)
 
 **Cluster Kubernetes** = 1.15.7-gke.23
 
 **Istio** = 1.4.4
 
+------
 <a name="tutoriel"></a>
 ## 3) Description en détail de tous les configurations  et pas à suivre
 
+------
 <a name="GKE"></a>
 ### Configuration Google Cloud GKE (Google Kubernetes Engine)
 
@@ -55,6 +59,7 @@ Activer votre compte cloud gratuitement (300$ de crédits offert ou pendant 1 an
 
 Créer un nouveau projet
 
+------
 <a name="createCluster"></a>
 ### Créer un nouveau cluster Kubernetes
 
@@ -82,6 +87,7 @@ Appuyer sur bouton "Créer"
 
 ![](img/clusterList.png)
 
+------
 <a name="verificationCluster"></a>
 ### Vérification de l'installation et configuration du cluster Kubernetes
 
@@ -129,6 +135,7 @@ Your active configuration is: [cloudshell-26194]
 clusterrolebinding.rbac.authorization.k8s.io/cluster-admin-binding created
 ```
 
+------
 <a name="installationIstio"></a>
 ### Installation d'Istio
 
@@ -240,6 +247,7 @@ kube-public       Active   127m
 kube-system       Active   127m
 ```
 
+------
 <a name="installationBookinfo"></a>
 ### Installation d'une application avec Istio
 
@@ -386,8 +394,11 @@ http://localhost:45465/kiali
 
 <a name="traffic"></a>
 
+------
 ### Traffic management
 
+------
+<a name="routing"></a>
 #### Request Routing
 
 Les services virtuels achemineront tout le trafic vers la v1 du système d'avis `reviews` de chaque microservice. Exécutez la commande suivante pour appliquer les services virtuels.
@@ -436,8 +447,8 @@ virtualservice.networking.istio.io "details" deleted
 
 > Remarque : il est aussi possible de filtrer l'accès aux microservices en fonction des informations provenant de l'entête HTTP de l'utilisateur (comme le type de navigateur ou en fonction du nom de l'utilisateur). Pour plus d'information : https://istio.io/docs/tasks/traffic-management/request-routing
 
+------
 <a name="fault"></a>
-
 #### Fault Injection
 
 Nous allons maintenant volontairement créer une "fault injection" avec la configuration ci-dessous :
@@ -460,10 +471,113 @@ Pour supprimer la configuration et revenir à l'état initial :
 $ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
+------
+<a name="shifting"></a>
+#### Traffic shifting
+
+Il est possible de migrer progressivement le trafic (HTTP ou TCP) d'une version d'un microservice à une autre. Cela peut être très utile pour la montée de version d'une application. Plus d'informations : https://istio.io/docs/tasks/traffic-management/traffic-shifting et https://istio.io/docs/tasks/traffic-management/tcp-traffic-shifting
+
+------
+<a name="timeout"></a>
+#### Request timeout
+
+Redirection de tout le traffic vers la version 1 de `reviews`
+```
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
+
+Redirection de tout le traffic vers la version 2 de `reviews`
+```
+$ kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v2
+EOF
+```
+
+Ajout d'un délai de 2 secondes
+```
+$ kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - fault:
+      delay:
+        percent: 100
+        fixedDelay: 2s
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+EOF
+```
+
+Lorsque vous rafraîchissez la page web de l'application bookinfo, vous pouvez remarquer un délai de 2 secondes et les microservices fonctionnement normalement.
+```
+$ kubectl apply -f - <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v2
+    timeout: 0.5s
+EOF
+```
+
+La page web affiche le messagge d'erreur "Error fetching product reviews! Sorry, product reviews are currently unavailable for this book." car le microservice `reviews` renvoie un timeout.
+
+![](img/productpageErrorTimeout.png)
+
+Visualistion sous Kiali, le microservice `reviews` renvoie un timeout après une seconde de délai. Par défaut, l'application bookinfo réssaye une fois la requête en plus de la première d'où la seconde de délai et pas la demie seconde.
+
+![](img/kialiGraphDashboardTimeout.png)
+
+Pour supprimer la configuration et revenir à l'état initial :
+
+```
+$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
+
+------
+<a name="breaker"></a>
+#### Circuit breaker
+
+Istio est capable d'implémenter un coupe circuit (circuit breaker). Les disjoncteurs existent pour empêcher les opérations plutôt que de les réexécuter quand le système n'est pas en bonne santé. Plus d'informations : https://istio.io/docs/tasks/traffic-management/circuit-breaking
+
+<a name="mirroring"></a>
+
+------
+#### Traffic mirroring
+
+La mise en miroir du trafic (traffic mirroring), est un concept qui permet aux équipes d'apporter des modifications à la production avec le moins de risques possible. La mise en miroir envoie une copie du trafic en direct à un service en miroir. Le trafic en miroir se produit en dehors du chemin critique des requêtes pour le service principal. Plus d'information : https://istio.io/docs/tasks/traffic-management/mirroring
+
 <a name="code"></a>
 
+------
 ## 4) Les code source et scripts élabore.
 
 <a name="diapo"></a>
 
+------
 ## 5) Diapos de votre présentation en PDF.
