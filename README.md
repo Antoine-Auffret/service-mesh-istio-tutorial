@@ -1,5 +1,18 @@
 # Service mesh with Istio : tutorial
 
+## Sommaire
+1. [Présentation de la technologie](#presentation)
+2. [Objectifs du tutoriel - contexte, description et résultats/connaisses attendus après l’exécution](#objectifs)
+3. [Description en détail de tous les configurations et pas à suivre](#tutoriel)
+    1. [Configuration Google Cloud GKE (Google Kubernetes Engine)](#GKE)
+    2. [Créer un nouveau cluster Kubernetes](#createCluster)
+    3. [Vérification de l'installation et configuration du cluster Kubernetes](#verificationCluster)
+    4. [Installation d'Istio](#installationIstio)
+    5. [Installation d'une application avec Istio](#installationBookinfo)
+4. [Les code source et scripts élabore](#code)
+5. [Diapos de votre présentation en PDF](#diapo)
+
+<a name="presentation"></a>
 ## 1) Présentation de la technologie
 
 **Service mesh** = Network of microservices
@@ -16,6 +29,7 @@
 
 **Platform support** = Spanning Cloud, on-premise, Kubernetes, Mesos, and more
 
+<a name="objectifs"></a>
 ## 2) Objectifs du tutoriel - contexte, description et résultats/connaisses  attendus après  l’exécution
 
 Before you can install Istio, you need a cluster running a compatible version of Kubernetes. Istio 1.4 has been tested with Kubernetes releases 1.13, 1.14, 1.15.
@@ -26,8 +40,10 @@ Before you can install Istio, you need a cluster running a compatible version of
 
 **Istio** = 1.4.4
 
+<a name="tutoriel"></a>
 ## 3) Description en détail de tous les configurations  et pas à suivre
 
+<a name="GKE"></a>
 ### Configuration Google Cloud GKE (Google Kubernetes Engine)
 
 Créer un compte Google : https://accounts.google.com/signup
@@ -38,6 +54,7 @@ Activer votre compte cloud gratuitement (300$ de crédits offert ou pendant 1 an
 
 Créer un nouveau projet
 
+<a name="createCluster"></a>
 ### Créer un nouveau cluster Kubernetes
 
 ![](img/createClusterButton.png)
@@ -64,11 +81,10 @@ Appuyer sur bouton "Créer"
 
 ![](img/clusterList.png)
 
+<a name="verificationCluster"></a>
 ### Vérification de l'installation et configuration du cluster Kubernetes
 
-Pour accéder à la console (shell) cliquer sur l'icone en haut à doite
-
-![](img/cloudShellIcon.png)
+Pour accéder à la console (shell) cliquer sur l'icone en haut à doite ![](img/cloudShellIcon.png)
 
 Vérifier l'état du cluster dans la console
 ```
@@ -109,6 +125,7 @@ Your active configuration is: [cloudshell-26194]
 clusterrolebinding.rbac.authorization.k8s.io/cluster-admin-binding created
 ```
 
+<a name="installationIstio"></a>
 ### Installation d'Istio
 
 Télécharger Istio dans le répertoire home du cluster
@@ -222,7 +239,8 @@ $ istioctl dashboard grafana
 http://localhost:40939
 ```
 
-### Installation d'une application
+<a name="installationBookinfo"></a>
+### Installation d'une application avec Istio
 
 L'application "bookinfo" déploie un exemple d'application composé de quatre microservices distincts utilisés pour démontrer diverses fonctionnalités d'Istio. L'application affiche des informations sur un livre, semblable à une entrée de catalogue unique d'une librairie en ligne. La page affiche une description du livre, les détails du livre et quelques avis sur le livre.
 
@@ -281,6 +299,9 @@ reviews-v2-d6cfdb7d6-nk2j9        2/2     Running   0          101s
 reviews-v3-75699b5cfb-gq8h7       2/2     Running   0          101s
 ```
 
+<a name="code"></a>
 ## 4) Les code source et scripts élabore.
+
+<a name="diapo"></a>
 
 ## 5) Diapos de votre présentation en PDF.
