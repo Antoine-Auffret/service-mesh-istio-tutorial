@@ -105,8 +105,11 @@ Activer l'auto-completion pour la commande `kubectl`
 ```
 $ kubectl completion bash > ~/kubectl.bash
 ```
+Sourcer `kubectl.bash` à la fin du fichier `.bashrc` en rajoutant :
 ```
-$ source ~/kubectl.bash
+if [ -f "kubectl.bash" ]; then
+  source "kubectl.bash"
+fi
 ```
 
 Vérifier la version de Kubernetes
@@ -133,17 +136,20 @@ Télécharger Istio dans le répertoire home du cluster
 $ curl -L https://istio.io/downloadIstio | sh -
 ```
 
-Ajouter la commande `istioctl` à la variable d'environnement PATH (en remplaçant a_y_auffret par votre nom)
+Ajouter la commande `istioctl` à la variable d'environnement PATH dans le fichier `.bashrc` :
 ```
-$ export PATH="$PATH:/home/a_y_auffret/istio-1.4.4/bin"
+export PATH="$PATH:$HOME/istio-1.4.4/bin"
 ```
 
 Activer l'auto-completion pour la commande `istioctl`
 ```
 $ cp ~/istio-1.4.4/tools/istioctl.bash ~/.
 ```
+Sourcer `istioctl.bash` à la fin du fichier `.bashrc` en rajoutant :
 ```
-$ source ~/istioctl.bash
+if [ -f "istioctl.bash" ]; then
+  source "istioctl.bash"
+fi
 ```
 
 Lancer la vérification de pré-installation d'Istio pour savoir si le cluster est prêt à installer Istio
@@ -218,7 +224,7 @@ kiali-fb5f485fb-87qhs                     1/1     Running   0          5m32s
 prometheus-685585888b-8dhsb               1/1     Running   0          5m37s
 ```
 
-Lorsque vous déployez votre application à l'aide de `kubectl apply`, l'injecteur sidecar d'Istio injectera automatiquement les conteneurs Envoy dans les pods d'applications s'ils sont démarrés dans des namespace étiquetés avec istio-injection=enabled
+Lorsque vous déployez votre application à l'aide de `kubectl apply`, l'injecteur sidecar d'Istio injectera automatiquement les conteneurs Envoy (un proxy et un bus de communication conçu pour les grandes architectures modernes orientées services) dans les pods d'applications s'ils sont démarrés dans des namespace étiquetés avec istio-injection=enabled
 ```
 $ kubectl label namespace default istio-injection=enabled
 namespace/default labeled
@@ -231,12 +237,6 @@ istio-system      Active   32m    disabled
 kube-node-lease   Active   127m
 kube-public       Active   127m
 kube-system       Active   127m
-```
-
-Vous pouvez lancer un dashboard (Web UI) comme grafana pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un navigateur
-```
-$ istioctl dashboard grafana
-http://localhost:40939
 ```
 
 <a name="installationBookinfo"></a>
@@ -299,7 +299,10 @@ reviews-v2-d6cfdb7d6-nk2j9        2/2     Running   0          101s
 reviews-v3-75699b5cfb-gq8h7       2/2     Running   0          101s
 ```
 
+> Remarque : chaque pods contient 2 containers, un pour le Envoy sidecar et l'autre le container pour l'application en question
+
 Vérifier maintenant que l'application fonctionne correctement à l'intérieur du cluster en se connectant à l'un des pods du cluster, par exemple `ratings-v1-7855f5bcb9-76426`
+
 ```
 $ kubectl exec -it ratings-v1-7855f5bcb9-76426 bash
 root@ratings-v1-7855f5bcb9-76426:/opt/microservices#
@@ -340,7 +343,24 @@ Ouvrir un navigateur web et accéder à l'URL avec l'adresse IP : http://35.222.
 
 ![](img/productpage.png)
 
+Activer les règles de destination pour les différents services 
+```
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/destination-rule-all.yaml
+destinationrule.networking.istio.io/productpage created
+destinationrule.networking.istio.io/reviews created
+destinationrule.networking.istio.io/ratings created
+destinationrule.networking.istio.io/details created
+```
+
 > Remarque : l'application bookinfo utilise un load balancer pour les 3 microservices `reviews`, il suffit de rafraîchir plusieurs fois la page pour voir que les système de notation diffère d'un microservice à un autre (pas d'étoile, étoiles noires ou étoiles rouges). Cela permet à Istio de rediriger le traffic vers différents microservices selon des règles préétablies. C'est l'une des fonctionnalités principales d'Istio le "**traffic management**" (https://istio.io/docs/concepts/traffic-management)
+
+Vous pouvez lancer grafana pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un navigateur et aller sur le dashboard "Istio Service Dashboard". Ce dashboad surveille les activités des services notament l'application bookinfo (http://35.222.49.120/productpage). Rafraîchisser plusieurs fois l'application bookinfo pour voir évoluer les graphiques (2.1 opérations par seconde). `Ctrl-C` pour terminer grafana.
+```
+$ istioctl dashboard grafana
+http://localhost:40939
+```
+
+![](img/grafanaServiceDashboard.png)
 
 <a name="code"></a>
 
