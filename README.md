@@ -1,12 +1,25 @@
 # Service mesh with Istio : Tutoriel
 
-------
-
 ## Sommaire
 
-[TOC]
+1. [Présentation de la technologie](#presentation)
+2. [Objectifs du tutoriel - contexte, description et résultats/connaisses attendus après l’exécution](#objectifs)
+3. [Description en détail de tous les configurations et pas à suivre](#tutoriel)
+    1. [Configuration Google Cloud GKE (Google Kubernetes Engine)](#GKE)
+    2. [Créer un nouveau cluster Kubernetes](#createCluster)
+    3. [Vérification de l'installation et configuration du cluster Kubernetes](#verificationCluster)
+    4. [Installation d'Istio](#installationIstio)
+    5. [Installation d'une application avec Istio](#installationBookinfo)
+    6. [Traffic management](#traffic)
+        1. [Request routing](#routing)
+        2. [Fault injection](#fault)
+        3. [Traffic shifting](#shifting)
+        4. [Request timeouts](#timeout)
+        5. [Circuit breaker](#breaker)
+        6. [Mirroring](#mirroring)
+4. [Les code source et scripts élabore](#code)
+5. [Diapos de votre présentation en PDF](#diapo)
 
-------
 <a name="presentation"></a>
 
 ## 1) Présentation de la technologie
@@ -25,7 +38,6 @@
 
 **Platform support** = Spanning Cloud, on-premise, Kubernetes, Mesos, and more
 
-------
 <a name="objectifs"></a>
 ## 2) Objectifs du tutoriel - contexte, description et résultats/connaisses  attendus après  l’exécution
 
@@ -43,11 +55,9 @@ Au cours de ce tutoriel vous installerez :
 
 **Istio** = 1.4.4
 
-------
 <a name="tutoriel"></a>
 ## 3) Description en détail de tous les configurations  et pas à suivre
 
-------
 <a name="GKE"></a>
 ### Configuration Google Cloud GKE (Google Kubernetes Engine)
 
@@ -394,10 +404,8 @@ http://localhost:45465/kiali
 
 <a name="traffic"></a>
 
-------
 ### Traffic management
 
-------
 <a name="routing"></a>
 #### Request Routing
 
@@ -565,19 +573,16 @@ $ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-al
 
 Istio est capable d'implémenter un coupe circuit (circuit breaker). Les disjoncteurs existent pour empêcher les opérations plutôt que de les réexécuter quand le système n'est pas en bonne santé. Plus d'informations : https://istio.io/docs/tasks/traffic-management/circuit-breaking
 
-<a name="mirroring"></a>
-
 ------
+<a name="mirroring"></a>
 #### Traffic mirroring
 
 La mise en miroir du trafic (traffic mirroring), est un concept qui permet aux équipes d'apporter des modifications à la production avec le moins de risques possible. La mise en miroir envoie une copie du trafic en direct à un service en miroir. Le trafic en miroir se produit en dehors du chemin critique des requêtes pour le service principal. Plus d'information : https://istio.io/docs/tasks/traffic-management/mirroring
 
 <a name="code"></a>
 
-------
 ## 4) Les code source et scripts élabore.
 
 <a name="diapo"></a>
 
-------
 ## 5) Diapos de votre présentation en PDF.
