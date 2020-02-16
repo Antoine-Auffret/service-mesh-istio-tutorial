@@ -9,6 +9,7 @@
     3. [Vérification de l'installation et configuration du cluster Kubernetes](#verificationCluster)
     4. [Installation d'Istio](#installationIstio)
     5. [Installation d'une application avec Istio](#installationBookinfo)
+    6. [Traffic management](#traffic)
 4. [Les code source et scripts élabore](#code)
 5. [Diapos de votre présentation en PDF](#diapo)
 
@@ -352,9 +353,9 @@ destinationrule.networking.istio.io/ratings created
 destinationrule.networking.istio.io/details created
 ```
 
-> Remarque : l'application bookinfo utilise un load balancer pour les 3 microservices `reviews`, il suffit de rafraîchir plusieurs fois la page pour voir que les système de notation diffère d'un microservice à un autre (pas d'étoile, étoiles noires ou étoiles rouges). Cela permet à Istio de rediriger le traffic vers différents microservices selon des règles préétablies. C'est l'une des fonctionnalités principales d'Istio le "**traffic management**" (https://istio.io/docs/concepts/traffic-management)
+> Remarque : l'application bookinfo utilise un load balancer pour les 3 microservices `reviews`, il suffit de rafraîchir plusieurs fois la page pour voir que les système de notation diffère d'un microservice à un autre (pas d'étoile, étoiles noires ou étoiles rouges). Cela permet à Istio de rediriger le traffic vers différents microservices selon des règles préétablies. En effet, sans une version de service par défaut explicite vers laquelle acheminer, Istio achemine les demandes vers toutes les versions disponibles (v1, v2 et v3) de manière circulaire. C'est l'une des fonctionnalités principales d'Istio le "**traffic management**" que l'on verra plus loin dans ce tutoriel (https://istio.io/docs/concepts/traffic-management)
 
-Envoyer périodiquement des requêtes sur la page web vers le cluster
+Envoyer périodiquement (0.5 requête par seconde) des requêtes sur la page web vers le cluster
 ```
 $ watch curl -s -o /dev/null http://35.222.49.120/productpage
 ```
@@ -369,7 +370,7 @@ http://localhost:40939
 
 ![](img/grafanaWorkloadDashboard.png)
 
-`Ctrl-C` pour terminer grafana.
+> `Ctrl-C` pour terminer grafana.
 
 Pour visualiser le service mesh Istio, vous pouvez utiliser Kiali (installé de base avec grafana dans le profil demo). Kiali (https://kiali.io/) est un outil de visualisation de l'observabilité du maillage de service et configuration pour Istio. L'onglet "Graph" permet de visualiser en temps réel l'état du maillage de service et le traffic pour chaque microservices.
 
@@ -381,7 +382,83 @@ http://localhost:45465/kiali
 
 ![](img/kialiGraphDashboard.png)
 
-`Ctrl-C` pour terminer kiali.
+> `Ctrl-C` pour terminer kiali.
+
+<a name="traffic"></a>
+
+### Traffic management
+
+#### Request Routing
+
+Les services virtuels achemineront tout le trafic vers la v1 du système d'avis `reviews` de chaque microservice. Exécutez la commande suivante pour appliquer les services virtuels.
+```
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+virtualservice.networking.istio.io/productpage created
+virtualservice.networking.istio.io/reviews created
+virtualservice.networking.istio.io/ratings created
+virtualservice.networking.istio.io/details created
+```
+
+Sur l'interface Kiali, vous pouvez voir progressivement que les requêtes sont redirigées uniquement sur la v1 de `reviews`.
+
+![](img/kialiGraphDashboardV1All.png)
+
+En effet, si on regarde à l'intérieur du fichier `~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml`, on peut voir que la destination est uniquement la v1 de `reviews`.
+
+```
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+```
+
+Si l'on consulte le site web (), vous pouvez remarquer que peut importe le nombre de fois que vous rafraîchissez la page, il n'a pas d'étoile dans les avis. Tout le traffic est bien redirigé vers le microservice v1 de `reviews`
+
+![](img/productpageV1All.png)
+
+Supprimer les services virtuels d'application pour revenir à l'état initial (load balancing entre v1, v2 et v3).
+
+```
+$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+virtualservice.networking.istio.io "productpage" deleted
+virtualservice.networking.istio.io "reviews" deleted
+virtualservice.networking.istio.io "ratings" deleted
+virtualservice.networking.istio.io "details" deleted
+```
+
+> Remarque : il est aussi possible de filtrer l'accès aux microservices en fonction des informations provenant de l'entête HTTP de l'utilisateur (comme le type de navigateur ou en fonction du nom de l'utilisateur). Pour plus d'information : https://istio.io/docs/tasks/traffic-management/request-routing
+
+<a name="fault"></a>
+
+#### Fault Injection
+
+Nous allons maintenant volontairement créer une "fault injection" avec la configuration ci-dessous :
+* productpage => reviews:v2 => ratings (seulement pour l'utilisateur jason) + HTTP 500
+* productpage => reviews:v1 (pour tout le reste)
+
+```
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-ratings-test-abort.yaml
+```
+
+Lorsque l'utilisateur `jason` se connecte à l'application bookinfo, celui-ci obtient une erreur sur les `ratings` "Ratings service is currently unavailable" (erreur HTTP 500). Voici ci-dessous le résultat sur Kiali.
+
+![](img/kialiGraphDashboardFaultInjection.png)
+
+Pour supprimer la configuration et revenir à l'état initial :
+
+```
+$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
 
 <a name="code"></a>
 
