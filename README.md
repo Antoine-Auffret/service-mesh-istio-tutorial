@@ -760,11 +760,135 @@ $ kubectl delete nanespace foo bar legacy
 <a name="citadel"></a>
 #### Citadel configuration
 
+Il est possible de configurer Citadel des certificats provenant d'autorités de certifications externes.
+
+Par défaut, Citadel génère un certificat racine et une clé auto-signés et les utilise pour signer les certificats de `workload`. Citadel peut également utiliser le certificat et la clé spécifiés par l'opérateur pour signer les certificats de `workload`, avec le certificat racine spécifié par l'opérateur. Plus d'informations : https://istio.io/docs/tasks/security/citadel-config/plugin-ca-cert
+
+Vous pouvez activer la fonction de vérification de l'intégrité de Citadel pour détecter les échecs du service Citadel CSR (Certificate Signing Request). Lorsqu'une défaillance est détectée, Kubelet redémarre automatiquement le conteneur Citadel. Plus d'information : https://istio.io/docs/tasks/security/citadel-config/health-check
+
 -----
 <a name="authorization"></a>
 #### Authorization
 
+Il est possible de mettre en place des contrôles d'accès avec Istio. La première étape est d'appliquer une politique `deny-all` qui aura pour conséquence de rejeter toutes les requêtes. Il faudra ensuite accorder plus d'accès graduellement.
+
+Voici un exemple de configuration pour appliquer la politique `deny-all` sur le namespace `default`
+```yaml
+$ kubectl apply -f - <<EOF
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+  namespace: default
+spec:
+  {}
+EOF
+```
+
+En rafraîchissant la page `productpage` de l'application bookinfo (http://35.222.49.120/productpage) dans un navigateur, vous obtienderez après quelques secondes le message : `RBAC: access denied`.
+
+Exécutez la commande suivante pour créer une politique `productpage-viewer` pour autoriser l'accès avec la méthode GET à la page `productpage`.
+```yaml
+$ kubectl apply -f - <<EOF
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "productpage-viewer"
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: productpage
+  rules:
+  - to:
+    - operation:
+        methods: ["GET"]
+EOF
+```
+
+La page web s'affiche désormais mais les microservices `details` et `reviews` ne sont pas accessible car nous n'avons pas autorisé `productpage` à accéder à `details` et `reviews`. 
+
+Exécutez les deux commandes suivantes pour créer les politiques `details-viewer` et `reviews-views` afin d'autoriser la charge de travail de `productpage`, qui émet des demandes à l'aide du compte de service `cluster.local/ns/default/sa/bookinfo-productpage`, d'accéder à la charge de travail `details` via les méthodes GET :
+```yaml
+$ kubectl apply -f - <<EOF
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "details-viewer"
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: details
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/default/sa/bookinfo-productpage"]
+    to:
+    - operation:
+        methods: ["GET"]
+EOF
+```
+```yaml
+$ kubectl apply -f - <<EOF
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "reviews-viewer"
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: reviews
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/default/sa/bookinfo-productpage"]
+    to:
+    - operation:
+        methods: ["GET"]
+EOF
+```
+
+La page affiche affiche maintenant les détails (partie gauche) et les avis (partie droite). Cependant, il y a une erreur `Ratings service currently unavailable` pour la partie des notations. Ce comportement est normal car la charge de travail `reviews` n'a pas la permission d'accéder à `ratings`.
+
+Exécutez la commande suivante pour créer la politique `ratings-viewer` afin d'autoriser la charge de travail de `reviews`, qui émet des demandes à l'aide du compte de service `cluster.local/ns/default/sa/bookinfo-reviews`, d'accéder à la charge de travail `ratings` via les méthodes GET :
+```yaml
+$ kubectl apply -f - <<EOF
+apiVersion: "security.istio.io/v1beta1"
+kind: "AuthorizationPolicy"
+metadata:
+  name: "ratings-viewer"
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: ratings
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/default/sa/bookinfo-reviews"]
+    to:
+    - operation:
+        methods: ["GET"]
+EOF
+```
+
+La page web est désormais accessible dans son intégralité avec le système de notation (pas d'étoile, étoiles noires ou étoile rouges).
+
+Pour revenir à la configuration initiale :
+```bash
+$ kubectl delete authorizationpolicy.security.istio.io/deny-all
+$ kubectl delete authorizationpolicy.security.istio.io/productpage-viewer
+$ kubectl delete authorizationpolicy.security.istio.io/details-viewer
+$ kubectl delete authorizationpolicy.security.istio.io/reviews-viewer
+$ kubectl delete authorizationpolicy.security.istio.io/ratings-viewer
+```
+
+Il est aussi possible de limiter les accès pour le trafic TCP, pour les groupes, les listes et plus. Plus d'informations : https://istio.io/docs/tasks/security/authorization
+
 <a name="policies"></a>
+
 ### Policies
 
 <a name="enablePolicy"></a>
