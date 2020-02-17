@@ -564,10 +564,41 @@ La mise en miroir du trafic (traffic mirroring), est un concept qui permet aux �
 <a name="observability"></a>
 ### Observability
 
+L'observabilté d'Istio permet de récupérer de la télémétrie prevenant du mesh comme des métriques, des logs, des traces et intègre des outils puissants pour la surveillance du service de maillage (Prometheus, Grafana, Kiali, Fluentd, Jaeger, Zipkin et plein d'autres).
+
 <a name="metrics"></a>
+
 #### Metrics
 
+Cette partie du tutoriel vous présente la configuration, la collecte et le traitement des métriques pour le mesh d'Istio.
+
+##### La collecte de métriques
+
+```bash
+$ kubectl apply -f samples/bookinfo/telemetry/metrics.yaml
+```
+
+Générer du trafic sur la page `product` page
+> Rappel : l'adresse ip externe est celle de l'ingressgateway (LoadBalancer)
+```bash
+$ watch curl -s -o /dev/null http://35.222.49.120/productpage 
+```
+
+Lancer prometheus dans un nouvel onglet de la console shell
+```bash
+$ istioctl dashboard prometheus
+```
+
+Dans Prometheus, cliquez dans l'onglet `Graph` puis chercher dans la liste `istio_response_bytes_count`, cliquer sur le bouton `Execute` et enfin changer de mode (Console à Graph) comme sur l'image ci-dessous :
+
+![](img/prometheus.png)
+
+Vous pouvez voir en jaune le nombre de réponse de la page `productpage` avec pour code retour HTTP 200, en marron la page `details` et en gris foncé `ratings-v1`.
+
+Mixer génère automatiquement de nouvelles métriques pour tout le trafic du mesh et les envoient à Prometheus.
+
 ##### Grafana
+
 Envoyer périodiquement (0.5 requête par seconde) des requêtes sur la page web vers le cluster
 ```bash
 $ watch curl -s -o /dev/null http://35.222.49.120/productpage
