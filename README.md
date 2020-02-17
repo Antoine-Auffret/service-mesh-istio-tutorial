@@ -17,8 +17,20 @@
         4. [Request timeouts](#timeout)
         5. [Circuit breaker](#breaker)
         6. [Mirroring](#mirroring)
-    7. [Security](#security)
-        1. [mutual TLS (mTLS)](#mtls)
+    7. [Observability](#observability)
+        1. [Metrics](#metrics)
+        2. [Logs](#logs)
+        3. [Distributed tracing](#tracing)
+        4. [Visualizing your mesh](#visualizing)
+    8. [Security](#security)
+        1. [Authentication with mutual TLS (mTLS)](#mtls)
+        2. [Citadel configuration](#citadel)
+        3. [Authorization](#authorization)
+    9. [Policies](#policies)
+        1. [Enabling policy enforcement](#enablePolicy)
+        2. [Enabling rate limit](#rateLimit)
+        3. [Control headers and routing](#headers)
+        4. [Denials and white/black listing](#listing)
 4. [Les code source et scripts élabore](#code)
 5. [Diapos de votre présentation en PDF](#diapo)
 
@@ -373,35 +385,6 @@ destinationrule.networking.istio.io/details created
 
 > Remarque : l'application bookinfo utilise un load balancer pour les 3 microservices `reviews`, il suffit de rafraîchir plusieurs fois la page pour voir que les système de notation diffère d'un microservice à un autre (pas d'étoile, étoiles noires ou étoiles rouges). Cela permet à Istio de rediriger le traffic vers différents microservices selon des règles préétablies. En effet, sans une version de service par défaut explicite vers laquelle acheminer, Istio achemine les demandes vers toutes les versions disponibles (v1, v2 et v3) de manière circulaire. C'est l'une des fonctionnalités principales d'Istio le "**traffic management**" que l'on verra plus loin dans ce tutoriel (https://istio.io/docs/concepts/traffic-management)
 
-Envoyer périodiquement (0.5 requête par seconde) des requêtes sur la page web vers le cluster
-```bash
-$ watch curl -s -o /dev/null http://35.222.49.120/productpage
-```
-
-Vous pouvez utiliser grafana (https://grafana.com/), une solution d'analyse et de surveillance, pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un navigateur et aller sur le dashboard "Istio Workload Dashboard" (onglet "Home" puis "Istio"), changer le namespace (default) et le workload (productpage-v1). Ce dashboad surveille les activités du cluster notament l'application bookinfo (http://35.222.49.120/productpage).
-
-Lancer grafana dans un nouvel onglet de la console shell
-```bash
-$ istioctl dashboard grafana
-http://localhost:40939
-```
-
-![](img/grafanaWorkloadDashboard.png)
-
-> `Ctrl-C` pour terminer grafana.
-
-Pour visualiser le service mesh Istio, vous pouvez utiliser Kiali (installé de base avec grafana dans le profil demo). Kiali (https://kiali.io/) est un outil de visualisation de l'observabilité du maillage de service et configuration pour Istio. L'onglet "Graph" permet de visualiser en temps réel l'état du maillage de service et le traffic pour chaque microservices.
-
-Lancer kiali dans un nouvel onglet de la console shell
-```bash
-$ istioctl dashboard kiali
-http://localhost:45465/kiali
-```
-
-![](img/kialiGraphDashboard.png)
-
-> `Ctrl-C` pour terminer kiali.
-
 ------
 <a name="traffic"></a>
 ### Traffic management
@@ -578,6 +561,54 @@ Istio est capable d'implémenter un coupe circuit (circuit breaker). Les disjonc
 
 La mise en miroir du trafic (traffic mirroring), est un concept qui permet aux équipes d'apporter des modifications à la production avec le moins de risques possible. La mise en miroir envoie une copie du trafic en direct à un service en miroir. Le trafic en miroir se produit en dehors du chemin critique des requêtes pour le service principal. Plus d'information : https://istio.io/docs/tasks/traffic-management/mirroring
 
+<a name="observability"></a>
+### Observability
+
+<a name="metrics"></a>
+#### Metrics
+
+##### Grafana
+Envoyer périodiquement (0.5 requête par seconde) des requêtes sur la page web vers le cluster
+```bash
+$ watch curl -s -o /dev/null http://35.222.49.120/productpage
+```
+
+Vous pouvez utiliser grafana (https://grafana.com/), une solution d'analyse et de surveillance, pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un navigateur et aller sur le dashboard "Istio Workload Dashboard" (onglet "Home" puis "Istio"), changer le namespace (default) et le workload (productpage-v1). Ce dashboad surveille les activités du cluster notament l'application bookinfo (http://35.222.49.120/productpage).
+
+Lancer grafana dans un nouvel onglet de la console shell
+```bash
+$ istioctl dashboard grafana
+http://localhost:40939
+```
+
+![](img/grafanaWorkloadDashboard.png)
+
+> `Ctrl-C` pour terminer grafana.
+
+-----
+<a name="logs"></a>
+#### Logs
+
+-----
+<a name="tracing"></a>
+#### Distributed tracing
+
+-----
+<a name="tracing"></a>
+#### Visualizing your mesh
+
+Pour visualiser le service mesh Istio, vous pouvez utiliser Kiali (installé de base avec grafana dans le profil demo). Kiali (https://kiali.io/) est un outil de visualisation de l'observabilité du maillage de service et configuration pour Istio. L'onglet "Graph" permet de visualiser en temps réel l'état du maillage de service et le traffic pour chaque microservices.
+
+Lancer kiali dans un nouvel onglet de la console shell
+```bash
+$ istioctl dashboard kiali
+http://localhost:45465/kiali
+```
+
+![](img/kialiGraphDashboard.png)
+
+> `Ctrl-C` pour terminer kiali.
+
 <a name="security"></a>
 ### Security
 
@@ -599,7 +630,7 @@ La sécurité dans Istio implique plusieurs composants :
 
 <a name="mtls"></a>
 
-#### mutual TLS (mTLS)
+#### Authentication with mutual TLS (mTLS)
 Vous pouvez appliquer une politique de sécurité à des services spécifiques ou vous pouvez l'appliquer à une étendue plus large, par exemple, à tous les services dans un namespace ou au mesh complet.
 mTLS possède deux modes : `PERMISSIVE` ou `STRICT`.
 Le mode `PERMISSIVE` permet le trafic en clair ou encrypté tandis que le mode `STRICT` autorise seulement le trafic encrypté. `PERMISSIVE` est le mode par défaut dans le profil "demo" de Istio.
@@ -724,6 +755,32 @@ $ kubectl delete meshpolicy default
 $ kubectl delete destinationrules default -n istio-system
 $ kubectl delete nanespace foo bar legacy
 ```
+
+-----
+<a name="citadel"></a>
+#### Citadel configuration
+
+-----
+<a name="authorization"></a>
+#### Authorization
+
+<a name="policies"></a>
+### Policies
+
+<a name="enablePolicy"></a>
+#### Enabling policy enforcement
+
+-----
+<a name="rateLimit"></a>
+#### Enabling rate limit
+
+-----
+<a name="headers"></a>
+#### Control headers and routing
+
+-----
+<a name="listing"></a>
+#### Denials and white/black listing
 
 <a name="code"></a>
 
