@@ -596,7 +596,7 @@ La sécurité dans Istio implique plusieurs composants :
 * `Mixer` pour gérer l'audit
 
 ![](img/architecture.png)
-<p style="text-align: center;"><b>Istio Security Architecture</b></p>
+
 <a name="mtls"></a>
 
 #### mutual TLS (mTLS)
