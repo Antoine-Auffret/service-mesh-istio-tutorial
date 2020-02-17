@@ -598,8 +598,8 @@ La sécurité dans Istio implique plusieurs composants :
 ![](img/architecture.png)
 <p style="text-align: center;"><b>Istio Security Architecture</b></p>
 <a name="mtls"></a>
-#### mutual TLS (mTLS)
 
+#### mutual TLS (mTLS)
 Vous pouvez appliquer une politique de sécurité à des services spécifiques ou vous pouvez l'appliquer à une étendue plus large, par exemple, à tous les services dans un namespace ou au mesh complet.
 mTLS possède deux modes : `PERMISSIVE` ou `STRICT`.
 Le mode `PERMISSIVE` permet le trafic en clair ou encrypté tandis que le mode `STRICT` autorise seulement le trafic encrypté. `PERMISSIVE` est le mode par défaut dans le profil "demo" de Istio.
