@@ -17,6 +17,8 @@
         4. [Request timeouts](#timeout)
         5. [Circuit breaker](#breaker)
         6. [Mirroring](#mirroring)
+    7. [Security](#security)
+        1. [mutual TLS (mTLS)](#mtls)
 4. [Les code source et scripts élabore](#code)
 5. [Diapos de votre présentation en PDF](#diapo)
 
@@ -595,7 +597,6 @@ La sécurité dans Istio implique plusieurs composants :
 
 ![](img/architecture.png)
 <p style="text-align: center;"><b>Istio Security Architecture</b></p>
-
 <a name="mtls"></a>
 #### mutual TLS (mTLS)
 Vous pouvez appliquer une politique de sécurité à des services spécifiques ou vous pouvez l'appliquer à une étendue plus large, par exemple, à tous les services dans un namespace ou au mesh complet.
