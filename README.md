@@ -1245,19 +1245,65 @@ Il est aussi possible de limiter les accès pour le trafic TCP, pour les groupes
 ### Policies
 
 <a name="enablePolicy"></a>
+
 #### Enabling policy enforcement
+
+Par défaut, lors de l’installation du profil "demo" les politiques (policies) sont activées, vous pouvez le vérifier avec la commande suivante
+
+```bash
+$ kubectl -n istio-system get cm istio -o jsonpath="{@.data.mesh}" | grep disablePolicyChecks
+disablePolicyChecks: false
+```
+
+Pour activer les politiques
+
+```bash
+$ istioctl manifest apply --set values.global.disablePolicyChecks=false
+```
 
 -----
 <a name="rateLimit"></a>
+
 #### Enabling rate limit
+
+Avec Istio, vous pouvez limiter dynamiquement le trafic vers un service. Vous aller appliquer des politiques permettant de limiter l'accès à l'application bookinfo grâce à des quotas.
+
+Mise à jour la route pour utiliser uniquement le microservice `reviews-v1`
+```bash
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
+
+La commande ci-dessous permet d'appliquer 4 règles différentes :
+* 500 requêtes par seconde si aucune autre règles n'est applicable
+* 1 requête toutes les 5 secondes si la destination est `reviews`
+* 500 requêtes par seconde si la destination est `productpage` et la source `10.28.11.20`
+* 2 requêtes toutes les 5 secondes si la destination est `productpage`
+```bash
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/policy/mixer-rule-productpage-ratelimit.yaml
+```
+
+Lorsque vous rafraîchissez la page `productpage` dans votre navigateur (exemple http://35.222.49.120/productpage) la règle 4 s'applique, elle vous autorise donc 2 requêtes toutes les 5 secondes sur la page `productpage`.
+Vous verrez donc le message d'erreur suivant dans votre navigateur lorsque le quota est dépassé : `RESOURCE_EXHAUSTED:Quota is exhausted for: requestcountquota`
+
+Pour revenir à l'état initial :
+```bash
+$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/policy/mixer-rule-productpage-ratelimit.yaml
+$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
 
 -----
 <a name="headers"></a>
+
 #### Control headers and routing
+
+Il est possible d'utiliser un adaptateur de politiques pour manipuler les en-têtes des requêtes HTTP et de routage. Plus d'informations : https://istio.io/docs/tasks/policy-enforcement/control-headers
 
 -----
 <a name="listing"></a>
+
 #### Denials and white/black listing
+
+Istio peut contrôler l'accès à un service à l'aide de simples refus, d'une liste blanche ou noire basée sur des attributs ou d'une liste blanche ou noire basée sur IP. Plus d'informations : https://istio.io/docs/tasks/policy-enforcement/denial-and-list
 
 <a name="code"></a>
 
