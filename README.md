@@ -908,11 +908,40 @@ Générer du trafic sur la page `productpage`
 $ watch curl -s -o /dev/null http://35.222.49.120/productpage 
 ```
 
+Vous pouvez désormais accéder à Kibana avec une redirection de port ou en exposant le service (`127.0.0.1:5601`)
 
+```bash
+$ kubectl -n logging port-forward service/kibana 5061:5601
+```
+
+> Ctrl-C pour quitter la redirection de port
 
 -----
 <a name="tracing"></a>
+
 #### Distributed tracing
+
+Le suivi distribué permet aux utilisateurs de suivre une demande à travers le mesh qui est distribué sur plusieurs services. Cela permet une compréhension plus approfondie de la latence des demandes, de la sérialisation et du parallélisme via la visualisation.
+
+Istio utilise les fonctionnalités de trace du proxy Envoy pour les traces et permet d'installer et d'utiliser des outils de consultation de trace comme Zipkin, Jaeger et LightStep.
+
+##### Jaeger
+
+```bash
+$ istioctl dashboard jaeger
+```
+
+Générer du trafic sur la page `productpage`
+```bash
+$ watch curl -s -o /dev/null http://35.222.49.120/productpage 
+```
+
+Sélectionner sur le panneau de gauche le service `productpage.default` puis `Find Traces` pour chercher les 20 dernières traces de la page `productpage`.
+
+![](img/jaegerSearch.png)
+
+Cliquer sur la dernière trace pour voir plus de détail comme les différentes plages qui correspondent aux demandes des services de bookinfo
+![](img/jaegerTrace.png)
 
 -----
 <a name="tracing"></a>
