@@ -925,8 +925,11 @@ Le suivi distribué permet aux utilisateurs de suivre une demande à travers le 
 
 Istio utilise les fonctionnalités de trace du proxy Envoy pour les traces et permet d'installer et d'utiliser des outils de consultation de trace comme Zipkin, Jaeger et LightStep.
 
+Dans ce tutoriel, seul Jaeger sera présenté car les deux autres offrent les mêmes fonctionnalités de visualisation de traces.
+
 ##### Jaeger
 
+Pour démarrer Jaeger
 ```bash
 $ istioctl dashboard jaeger
 ```
