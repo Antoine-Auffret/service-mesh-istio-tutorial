@@ -1,6 +1,6 @@
 # Service mesh with Istio : Tutoriel
 
-## Sommaire test2
+## Sommaire
 
 1. [Présentation de la technologie](#presentation)
 2. [Objectifs du tutoriel - contexte, description et résultats/connaisses attendus après l’exécution](#objectifs)
@@ -39,6 +39,8 @@
 ## 1) Présentation de la technologie
 
 **Service mesh** = Network of microservices
+
+**Microservices** = Architectural style that structures an application as a collection of services
 
 **Istio** = Complete solution to manage a service mesh
 
@@ -572,13 +574,18 @@ L'observabilté d'Istio permet de récupérer de la télémétrie prevenant du m
 
 Cette partie du tutoriel vous présente la configuration, la collecte et le traitement des métriques pour le mesh d'Istio.
 
-##### La collecte de métriques
+##### Prometheus
+
+Enter la commande suivante pour générer des métriques
 
 ```bash
-$ kubectl apply -f samples/bookinfo/telemetry/metrics.yaml
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/telemetry/metrics.yaml
 ```
 
-Générer du trafic sur la page `product` page
+Ce fichier génère des métriques pour tous les services (client et serveur) de l'application bookinfo, configure Prometheus (un système de surveillance de d'alerte https://prometheus.io) pour ajouter les métriques au nom de `double_request_count` et les envoies à Prometheus (voir le fichier `~/istio-1.4.4/samples/bookinfo/telemetry/metrics.yaml` pour plus de détail sur la configuration).
+
+Générer du trafic sur la page `productpage`
+
 > Rappel : l'adresse ip externe est celle de l'ingressgateway (LoadBalancer)
 ```bash
 $ watch curl -s -o /dev/null http://35.222.49.120/productpage 
@@ -589,13 +596,21 @@ Lancer prometheus dans un nouvel onglet de la console shell
 $ istioctl dashboard prometheus
 ```
 
-Dans Prometheus, cliquez dans l'onglet `Graph` puis chercher dans la liste `istio_response_bytes_count`, cliquer sur le bouton `Execute` et enfin changer de mode (Console à Graph) comme sur l'image ci-dessous :
+Dans Prometheus, cliquez dans l'onglet `Graph` puis chercher dans la liste `istio_double_request_count`, cliquer sur le bouton `Execute` et enfin changer de mode (Console à Graph) comme sur l'image ci-dessous :
 
 ![](img/prometheus.png)
 
-Vous pouvez voir en jaune le nombre de réponse de la page `productpage` avec pour code retour HTTP 200, en marron la page `details` et en gris foncé `ratings-v1`.
+Vous pouvez voir toutes les métriques de bookinfo arriver toutes les 2 secondes (grâce aux programme `watch`) dans Prometheus.
 
-Mixer génère automatiquement de nouvelles métriques pour tout le trafic du mesh et les envoient à Prometheus.
+> `Ctrl-C` pour terminer Prometheus.
+
+Pour revenir à l'état initial :
+
+```bash
+$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/telemetry/metrics.yaml
+```
+
+> Remarque : il est aussi possible de générer des métriques pour des services en TCP. Plus d'informations : https://istio.io/docs/tasks/observability/metrics/tcp-metrics
 
 ##### Grafana
 
@@ -604,21 +619,296 @@ Envoyer périodiquement (0.5 requête par seconde) des requêtes sur la page web
 $ watch curl -s -o /dev/null http://35.222.49.120/productpage
 ```
 
-Vous pouvez utiliser grafana (https://grafana.com/), une solution d'analyse et de surveillance, pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un navigateur et aller sur le dashboard "Istio Workload Dashboard" (onglet "Home" puis "Istio"), changer le namespace (default) et le workload (productpage-v1). Ce dashboad surveille les activités du cluster notament l'application bookinfo (http://35.222.49.120/productpage).
+Vous pouvez utiliser Grafana (https://grafana.com), une solution d'analyse et de surveillance.
 
-Lancer grafana dans un nouvel onglet de la console shell
+Lancer Grafana dans un nouvel onglet de la console shell
+
 ```bash
 $ istioctl dashboard grafana
 http://localhost:40939
 ```
 
+Pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un navigateur et aller sur le dashboard "Istio Workload Dashboard" (onglet "Home" puis "Istio"), changer le namespace (default) et le workload (productpage-v1). Ce dashboad surveille les activités du cluster notament l'application bookinfo (http://35.222.49.120/productpage).
+
 ![](img/grafanaWorkloadDashboard.png)
 
-> `Ctrl-C` pour terminer grafana.
+> `Ctrl-C` pour terminer Grafana.
 
 -----
 <a name="logs"></a>
+
 #### Logs
+
+##### Collecte de logs
+
+Appliquez un fichier YAML avec une configuration pour le nouveau flux (`newlog`) de logs qu'Istio générera et collectera automatiquement. 
+```bash
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/telemetry/log-entry.yaml
+```
+
+Générer du trafic sur la page `productpage`
+```bash
+$ watch curl -s -o /dev/null http://35.222.49.120/productpage 
+```
+
+Vérifiez que le flux de logs qui ont le nom `newlog`
+```bash
+$ kubectl logs -n istio-system -l istio-mixer-type=telemetry -c mixer | grep "newlog" | grep -v '"destination":"telemetry"' | grep -v '"destination":"pilot"' | grep -v '"destination":"policy"' | grep -v '"destination":"unknown"'
+
+{"level":"warn","time":"2020-02-18T03:30:11.834802Z","instance":"newlog.instance.istio-system","destination":"ratings","latency":"4.287619ms","responseCode":200,"responseSize":48,"source":"reviews","user":"unknown"}
+{"level":"warn","time":"2020-02-18T03:30:11.823123Z","instance":"newlog.instance.istio-system","destination":"reviews","latency":"22.106012ms","responseCode":200,"responseSize":379,"source":"productpage","user":"unknown"}
+{"level":"warn","time":"2020-02-18T03:30:11.821969Z","instance":"newlog.instance.istio-system","destination":"reviews","latency":"24.682795ms","responseCode":200,"responseSize":379,"source":"productpage","user":"unknown"}
+{"level":"warn","time":"2020-02-18T03:30:11.810979Z","instance":"newlog.instance.istio-system","destination":"productpage","latency":"38.641273ms","responseCode":200,"responseSize":5183,"source":"istio-ingressgateway","user":"unknown"}
+{"level":"warn","time":"2020-02-18T03:30:11.810499Z","instance":"newlog.instance.istio-system","destination":"productpage","latency":"40.103621ms","responseCode":200,"responseSize":5183,"source":"istio-ingressgateway","user":"unknown"}
+```
+
+Pour revenir à la configuration initiale
+```bash
+$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/telemetry/log-entry.yaml
+```
+> Remarque : on peut aussi collecter les logs d'accès de Envoy proxy. Plus d'informations : https://istio.io/docs/tasks/observability/logs/access-log
+
+##### Fluentd, Elasticsearch et Kibana
+
+Istio est capable de configurer des entrées de logs personnalisées et de les envoyer dans Fluentd (collecteur de log, https://www.fluentd.org).
+
+Fluent peut être combiné avec Elasticsearch (moteur de recherche et d'analyse distribué, https://www.elastic.co/elasticsearch) et Kibana (visualisation des données pour les données indexées dans Elasticsearch, https://www.elastic.co/kibana).
+
+Sauvegarder la configuration ci-dessous pour installer Fluent, Elasticsearch et Kibana dans un fichier `logging-stack.yaml`
+```yaml
+# Logging Namespace. All below are a part of this namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logging
+---
+# Elasticsearch Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  namespace: logging
+  labels:
+    app: elasticsearch
+spec:
+  ports:
+  - port: 9200
+    protocol: TCP
+    targetPort: db
+  selector:
+    app: elasticsearch
+---
+# Elasticsearch Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  namespace: logging
+  labels:
+    app: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.1.1
+        name: elasticsearch
+        resources:
+          # need more cpu upon initialization, therefore burstable class
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        env:
+          - name: discovery.type
+            value: single-node
+        ports:
+        - containerPort: 9200
+          name: db
+          protocol: TCP
+        - containerPort: 9300
+          name: transport
+          protocol: TCP
+        volumeMounts:
+        - name: elasticsearch
+          mountPath: /data
+      volumes:
+      - name: elasticsearch
+        emptyDir: {}
+---
+# Fluentd Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: fluentd-es
+  namespace: logging
+  labels:
+    app: fluentd-es
+spec:
+  ports:
+  - name: fluentd-tcp
+    port: 24224
+    protocol: TCP
+    targetPort: 24224
+  - name: fluentd-udp
+    port: 24224
+    protocol: UDP
+    targetPort: 24224
+  selector:
+    app: fluentd-es
+---
+# Fluentd Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fluentd-es
+  namespace: logging
+  labels:
+    app: fluentd-es
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fluentd-es
+  template:
+    metadata:
+      labels:
+        app: fluentd-es
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - name: fluentd-es
+        image: gcr.io/google-containers/fluentd-elasticsearch:v2.0.1
+        env:
+        - name: FLUENTD_ARGS
+          value: --no-supervisor -q
+        resources:
+          limits:
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/fluent/config.d
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: config-volume
+        configMap:
+          name: fluentd-es-config
+---
+# Fluentd ConfigMap, contains config files.
+kind: ConfigMap
+apiVersion: v1
+data:
+  forward.input.conf: |-
+    # Takes the messages sent over TCP
+    <source>
+      type forward
+    </source>
+  output.conf: |-
+    <match **>
+       type elasticsearch
+       log_level info
+       include_tag_key true
+       host elasticsearch
+       port 9200
+       logstash_format true
+       # Set the chunk limits.
+       buffer_chunk_limit 2M
+       buffer_queue_limit 8
+       flush_interval 5s
+       # Never wait longer than 5 minutes between retries.
+       max_retry_wait 30
+       # Disable the limit on the number of retries (retry forever).
+       disable_retry_limit
+       # Use multiple threads for processing.
+       num_threads 2
+    </match>
+metadata:
+  name: fluentd-es-config
+  namespace: logging
+---
+# Kibana Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: logging
+  labels:
+    app: kibana
+spec:
+  ports:
+  - port: 5601
+    protocol: TCP
+    targetPort: ui
+  selector:
+    app: kibana
+---
+# Kibana Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: logging
+  labels:
+    app: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana-oss:6.1.1
+        resources:
+          # need more cpu upon initialization, therefore burstable class
+          limits:
+            cpu: 1000m
+          requests:
+            cpu: 100m
+        env:
+          - name: ELASTICSEARCH_URL
+            value: http://elasticsearch:9200
+        ports:
+        - containerPort: 5601
+          name: ui
+          protocol: TCP
+---
+```
+
+Lancer la configuration sauvegardée
+```bash
+$ kubectl apply -f logging-stack.yaml
+```
+
+Configurer Istio pour envoyer des logs dans Fluentd
+```bash
+$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/telemetry/fluentd-istio.yaml
+```
+
+Générer du trafic sur la page `productpage`
+```bash
+$ watch curl -s -o /dev/null http://35.222.49.120/productpage 
+```
+
+
 
 -----
 <a name="tracing"></a>
