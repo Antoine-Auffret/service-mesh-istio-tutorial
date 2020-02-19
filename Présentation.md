@@ -1,6 +1,6 @@
 <h1>Architecture des applications</h1>
 <h1>Présentation de la solution ISTIO</h1>
-<div style="text-align: right">
+<div style="text-align: justify">
 <ol>
 <li>I.	Contexte et Limites actuelles</li>
   <p>Aujourd’hui avec l’expansion du cloud, de plus en plus d’entreprises se tournent vers des architecture microservices, abandonnant le développement d’application centralisées. Que cela soit pour faire migrer une architecture monolithique, ou développer une nouvelle application, les réseaux de microservices attirent de plus en plus. Toutefois, malgré leur popularité, ces architectures peuvent être complexes à mettre en place et ne sont pas adaptés à toutes les entreprises.</p>
