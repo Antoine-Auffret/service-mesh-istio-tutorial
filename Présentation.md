@@ -1,6 +1,6 @@
 <h1>Architecture des applications</h1>
 <h1>Présentation de la solution ISTIO</h1>
-
+<div style="text-align: right">
 <ol>
 <li>I.	Contexte et Limites actuelles</li>
   <p>Aujourd’hui avec l’expansion du cloud, de plus en plus d’entreprises se tournent vers des architecture microservices, abandonnant le développement d’application centralisées. Que cela soit pour faire migrer une architecture monolithique, ou développer une nouvelle application, les réseaux de microservices attirent de plus en plus. Toutefois, malgré leur popularité, ces architectures peuvent être complexes à mettre en place et ne sont pas adaptés à toutes les entreprises.</p>
@@ -109,3 +109,4 @@
   <p>Istio est une solution qui se base sur une application d’orchestration de conteneur, dont les dernières versions supportent Kubernetes qui est la plus connue et Nomad fonctionnant avec Consul. (Pour prendre l’exemple de Kubernetes, une application d’orchestration de conteneur, permet de gérer un réseau ou un parc de multiples services. Son rôle est de d’automatiser les déploiements de nouvelles instances via les conteneurs, mais aussi la mise à l’échelle en fonctions des besoins du réseau, et la gestion de applications et service des manières générales par le biais des conteneurs. Une solution comme Kubernetes est donc obligatoire au fonctionnement d’Istio, et permet d’adapter les ressources du serveur correspondants au conteneur de services, en fonction des besoins de l’architecture. L’un des principaux objectifs d’Istio reste toutefois de fonctionner qu’importe l’application d’orchestration de conteneur, et malgré le fait que Kubernetes soit aujourd’hui la plus connues, elle n’est pas une obligation, à l’inverse de la solution Envoy qui gère les proxy sidecars.</p>
   
 </ol>
+</div>
