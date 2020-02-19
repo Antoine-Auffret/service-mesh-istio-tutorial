@@ -38,6 +38,51 @@
 
 ## 1) Présentation de la technologie
 
+Istio = "naviguer" en grec
+
+Kubernetes = "orchestrateur" en grec
+
+Les buts principaux de l'architecture d'Istio :
+
+* **Maximisé la transparence** pour éviter d'ajouter du travail supplémentaire aux administrateurs et développeurs.
+* **Extensible** pour s'adapter aux besoins et aux changement du service de maillage.
+* **Portable** pour qu'Istio puisse être installé sans effort sur tout type d'environnement (Cloud, mono ou multi cluster).
+* **L'uniformité des politiques** permet à Istio de maintenir son propre système de politique dans un service dédié avec son API et offre la possibilité aux autres services de l'utiliser si nécessaire.
+
+Composants d'Istio :
+
+* Citadel
+  * Authentification
+  * Gestion des identifiants
+  * Chiffrement du trafic
+  * Autorisation
+* Egress gateway
+* Galley
+  * Validateur de configuration, d'ingestion, de traitement et de distribution
+  * Isole les composants Istio de la plateforme sous-jacente (ex : Kubernetes)
+* Ingress gateway
+* Mixer
+  * Contrôle d'accès
+  * Utilisation des politiques
+  * Collecte des données de télémétrie
+* Pilot
+  * Découverte de service pour les sidecars Envoy
+  * Gestion du trafic intelligent (routage, propagation, synthétisation)
+  * Résilience (timeouts, retries, circuit beakers, etc)
+* Sidecar injector
+* Telemetry
+* Tracing
+
+Un maillage de service Istio est logiquement divisé en un plan de données (**data plane**) et un plan de contrôle (**control plane**).
+
+Le **data plane** est composé d'un ensemble de proxies intelligents (Envoy) déployés en tant que sidecars. Ces proxies assurent la médiation et le contrôle de toutes les communications réseau entre les microservices.
+
+Le **control plane** est la couche sur laquelle des messages et la configuration transite entre les composants Istio (istio-system) pour contrôler le comportement du maillage (mesh).
+
+Istio utilise une version amélioré d'Envoy, un proxy haute performance, pour gérer le trafic entrant et sortant de tout les services dans le maillage. C'est le seul composant à interagir avec le data plane. Envoy possède de nombreuses fonctionnalités comme la découverte de services dynamique, l'équilibrage de la charge, disjoncteurs, injections de fautes, des métriques. Le proxy permet aussi de contrôler le trafic, d'offrir un réseau résilient et gérer la sécurité.
+
+Le proxy Envoy permet d'ajouter les capacités d'Istio dans un environnement existant sans changer l'architecture ni de modifier le code des applications.
+
 **Service mesh** = Network of microservices
 
 **Microservices** = Architectural style that structures an application as a collection of services
