@@ -38,6 +38,8 @@
 
 ## 1) Présentation de la technologie
 
+Istio est un maillage de service indépendant de la plateforme open-source qui fournit la gestion du trafic, l'application des politiques et la collecte de télémétrie.
+
 Istio = "naviguer" en grec
 
 Kubernetes = "orchestrateur" en grec
@@ -114,7 +116,7 @@ Au cours de ce tutoriel vous installerez :
 
 **Cluster Kubernetes** = 1.15.7-gke.23
 
-**Istio** = 1.4.4
+**Istio** = 1.4.5
 
 <a name="tutoriel"></a>
 ## 3) Description en détail de tous les configurations  et pas à suivre
@@ -217,12 +219,12 @@ $ curl -L https://istio.io/downloadIstio | sh -
 
 Ajouter la commande `istioctl` à la variable d'environnement PATH dans le fichier `.bashrc` :
 ```bash
-export PATH="$PATH:$HOME/istio-1.4.4/bin"
+export PATH="$PATH:$HOME/istio-1.4.5/bin"
 ```
 
 Activer l'auto-completion pour la commande `istioctl`
 ```bash
-$ cp ~/istio-1.4.4/tools/istioctl.bash ~/.
+$ cp ~/istio-1.4.5/tools/istioctl.bash ~/.
 ```
 Sourcer `istioctl.bash` à la fin du fichier `.bashrc` en rajoutant :
 ```bash
@@ -341,7 +343,7 @@ L'architecture de l'application est présentée ci-dessous.
 
 Déployer l'application bookinfo
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/platform/kube/bookinfo.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/platform/kube/bookinfo.yaml
 service/details created
 serviceaccount/bookinfo-details created
 deployment.apps/details-v1 created
@@ -398,7 +400,7 @@ Récupérer le titre de la page web de l'application avec l'URL http://productpa
 Pour accéder à l'application à l'extérieur du cluster, vous devez configurer une passerelle (gateway)
 
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/bookinfo-gateway.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/networking/bookinfo-gateway.yaml
 gateway.networking.istio.io/bookinfo-gateway created
 virtualservice.networking.istio.io/bookinfo created
 ```
@@ -423,7 +425,7 @@ Ouvrir un navigateur web et accéder à l'URL avec l'adresse IP : http://35.222.
 
 Activer les règles de destination pour les différents services 
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/destination-rule-all.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/networking/destination-rule-all.yaml
 destinationrule.networking.istio.io/productpage created
 destinationrule.networking.istio.io/reviews created
 destinationrule.networking.istio.io/ratings created
@@ -441,7 +443,7 @@ destinationrule.networking.istio.io/details created
 
 Les services virtuels achemineront tout le trafic vers la v1 du système d'avis `reviews` de chaque microservice. Exécutez la commande suivante pour appliquer les services virtuels.
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-all-v1.yaml
 virtualservice.networking.istio.io/productpage created
 virtualservice.networking.istio.io/reviews created
 virtualservice.networking.istio.io/ratings created
@@ -452,7 +454,7 @@ Sur l'interface Kiali, vous pouvez voir progressivement que les requêtes sont r
 
 ![](img/kialiGraphDashboardV1All.png)
 
-En effet, si on regarde à l'intérieur du fichier `~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml`, on peut voir que la destination est uniquement la v1 de `reviews`.
+En effet, si on regarde à l'intérieur du fichier `~/istio-1.4.5/samples/bookinfo/networking/virtual-service-all-v1.yaml`, on peut voir que la destination est uniquement la v1 de `reviews`.
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -476,7 +478,7 @@ Si l'on consulte le site web (), vous pouvez remarquer que peut importe le nombr
 Supprimer les services virtuels d'application pour revenir à l'état initial (load balancing entre v1, v2 et v3).
 
 ```bash
-$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-all-v1.yaml
 virtualservice.networking.istio.io "productpage" deleted
 virtualservice.networking.istio.io "reviews" deleted
 virtualservice.networking.istio.io "ratings" deleted
@@ -494,9 +496,9 @@ Nous allons maintenant volontairement créer une "fault injection" avec la confi
 * productpage => reviews:v1 (pour tout le reste)
 
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-ratings-test-abort.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-ratings-test-abort.yaml
 ```
 
 Lorsque l'utilisateur `jason` se connecte à l'application bookinfo, celui-ci obtient une erreur sur les `ratings` "Ratings service is currently unavailable" (erreur HTTP 500). Voici ci-dessous le résultat sur Kiali.
@@ -506,7 +508,7 @@ Lorsque l'utilisateur `jason` se connecte à l'application bookinfo, celui-ci ob
 Pour supprimer la configuration et revenir à l'état initial :
 
 ```bash
-$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
 ------
@@ -521,7 +523,7 @@ Il est possible de migrer progressivement le trafic (HTTP ou TCP) d'une version 
 
 Redirection de tout le traffic vers la version 1 de `reviews`
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
 Redirection de tout le traffic vers la version 2 de `reviews`
@@ -593,7 +595,7 @@ Visualistion sous Kiali, le microservice `reviews` renvoie un timeout après une
 
 Pour supprimer la configuration et revenir à l'état initial :
 ```bash
-$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
 ------
@@ -624,10 +626,10 @@ Cette partie du tutoriel vous présente la configuration, la collecte et le trai
 Enter la commande suivante pour générer des métriques
 
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/telemetry/metrics.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/telemetry/metrics.yaml
 ```
 
-Ce fichier génère des métriques pour tous les services (client et serveur) de l'application bookinfo, configure Prometheus (un système de surveillance de d'alerte https://prometheus.io) pour ajouter les métriques au nom de `double_request_count` et les envoies à Prometheus (voir le fichier `~/istio-1.4.4/samples/bookinfo/telemetry/metrics.yaml` pour plus de détail sur la configuration).
+Ce fichier génère des métriques pour tous les services (client et serveur) de l'application bookinfo, configure Prometheus (un système de surveillance de d'alerte https://prometheus.io) pour ajouter les métriques au nom de `double_request_count` et les envoies à Prometheus (voir le fichier `~/istio-1.4.5/samples/bookinfo/telemetry/metrics.yaml` pour plus de détail sur la configuration).
 
 Générer du trafic sur la page `productpage`
 
@@ -652,7 +654,7 @@ Vous pouvez voir toutes les métriques de bookinfo arriver toutes les 2 secondes
 Pour revenir à l'état initial :
 
 ```bash
-$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/telemetry/metrics.yaml
+$ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/telemetry/metrics.yaml
 ```
 
 > Remarque : il est aussi possible de générer des métriques pour des services en TCP. Plus d'informations : https://istio.io/docs/tasks/observability/metrics/tcp-metrics
@@ -688,7 +690,7 @@ Pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un na
 
 Appliquez un fichier YAML avec une configuration pour le nouveau flux (`newlog`) de logs qu'Istio générera et collectera automatiquement. 
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/telemetry/log-entry.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/telemetry/log-entry.yaml
 ```
 
 Générer du trafic sur la page `productpage`
@@ -709,7 +711,7 @@ $ kubectl logs -n istio-system -l istio-mixer-type=telemetry -c mixer | grep "ne
 
 Pour revenir à la configuration initiale
 ```bash
-$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/telemetry/log-entry.yaml
+$ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/telemetry/log-entry.yaml
 ```
 > Remarque : on peut aussi collecter les logs d'accès de Envoy proxy. Plus d'informations : https://istio.io/docs/tasks/observability/logs/access-log
 
@@ -945,7 +947,7 @@ $ kubectl apply -f logging-stack.yaml
 
 Configurer Istio pour envoyer des logs dans Fluentd
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/telemetry/fluentd-istio.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/telemetry/fluentd-istio.yaml
 ```
 
 Générer du trafic sur la page `productpage`
@@ -1073,14 +1075,14 @@ Nous allons activer mTLS de manière globale (mesh complet).
 L'exemple qui suit utilise deux namespace foo et bar, avec deux services, httpbin et sleep, fonctionnant tous les deux avec un proxy Envoy sidecar. Nous utilisons également des secondes instances de httpbin et nous mettons en veille sans le sidecar dans le namespace hérité.
 ```bash
 $ kubectl create namespace foo
-$ kubectl apply -f <(istioctl kube-inject -f ~/istio-1.4.4/samples/httpbin/httpbin.yaml) -n foo
-$ kubectl apply -f <(istioctl kube-inject -f ~/istio-1.4.4/samples/sleep/sleep.yaml) -n foo
+$ kubectl apply -f <(istioctl kube-inject -f ~/istio-1.4.5/samples/httpbin/httpbin.yaml) -n foo
+$ kubectl apply -f <(istioctl kube-inject -f ~/istio-1.4.5/samples/sleep/sleep.yaml) -n foo
 $ kubectl create namespace bar
-$ kubectl apply -f <(istioctl kube-inject -f ~/istio-1.4.4/samples/httpbin/httpbin.yaml) -n bar
-$ kubectl apply -f <(istioctl kube-inject -f ~/istio-1.4.4/samples/sleep/sleep.yaml) -n bar
+$ kubectl apply -f <(istioctl kube-inject -f ~/istio-1.4.5/samples/httpbin/httpbin.yaml) -n bar
+$ kubectl apply -f <(istioctl kube-inject -f ~/istio-1.4.5/samples/sleep/sleep.yaml) -n bar
 $ kubectl create namespace legacy
-$ kubectl apply -f ~/istio-1.4.4/samples/httpbin/httpbin.yaml -n legacy
-$ kubectl apply -f ~/istio-1.4.4/samples/sleep/sleep.yaml -n legacy
+$ kubectl apply -f ~/istio-1.4.5/samples/httpbin/httpbin.yaml -n legacy
+$ kubectl apply -f ~/istio-1.4.5/samples/sleep/sleep.yaml -n legacy
 ```
 
 Cette commande permet en une seule ligne d'itérer de manière pratique dans toutes les combinaisons d'accessibilité :
@@ -1315,7 +1317,7 @@ Avec Istio, vous pouvez limiter dynamiquement le trafic vers un service. Vous al
 
 Mise à jour la route pour utiliser uniquement le microservice `reviews-v1`
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
 La commande ci-dessous permet d'appliquer 4 règles différentes :
@@ -1324,7 +1326,7 @@ La commande ci-dessous permet d'appliquer 4 règles différentes :
 * 500 requêtes par seconde si la destination est `productpage` et la source `10.28.11.20`
 * 2 requêtes toutes les 5 secondes si la destination est `productpage`
 ```bash
-$ kubectl apply -f ~/istio-1.4.4/samples/bookinfo/policy/mixer-rule-productpage-ratelimit.yaml
+$ kubectl apply -f ~/istio-1.4.5/samples/bookinfo/policy/mixer-rule-productpage-ratelimit.yaml
 ```
 
 Lorsque vous rafraîchissez la page `productpage` dans votre navigateur (exemple http://35.222.49.120/productpage) la règle 4 s'applique, elle vous autorise donc 2 requêtes toutes les 5 secondes sur la page `productpage`.
@@ -1332,8 +1334,8 @@ Vous verrez donc le message d'erreur suivant dans votre navigateur lorsque le qu
 
 Pour revenir à l'état initial :
 ```bash
-$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/policy/mixer-rule-productpage-ratelimit.yaml
-$ kubectl delete -f ~/istio-1.4.4/samples/bookinfo/networking/virtual-service-all-v1.yaml
+$ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/policy/mixer-rule-productpage-ratelimit.yaml
+$ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
 -----
