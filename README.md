@@ -1,5 +1,7 @@
 # Service mesh with Istio : Tutoriel
 
+Tutoriel réalisé par Antoine Auffret et Emmanuel Sauvegrain dans le cardre du cours "8INF853 - Architecture des applications d'entreprise" présenté par Fabio Petrillo à l'UQAC.
+
 ## Sommaire
 
 1. [Présentation de la technologie](#presentation)
