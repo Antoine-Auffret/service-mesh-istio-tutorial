@@ -1445,7 +1445,7 @@ Istio peut contrôler l'accès à un service à l'aide de simples refus, d'une l
 * Installing Istio on GKE. 19 février 2020. https://cloud.google.com/istio/docs/istio-on-gke/installing [consulté le 1 février 2020]
 * istio/istio: Connect, secure, control, and observe services. 19 février 2020. https://github.com/istio/istio [consulté le 13 février 2020]
 * Istio / Docs. 15 octobre 2019. https://istio.io/docs [consulté le 29 janvier 2020]
-  [ Kube 50 ] Installing Istio in Kubernetes Cluster - YouTube. 15 août 2019. https://www.youtube.com/watch?v=WFu8OLXUETY&list=PL34sAs7_26wPkw9g-5NQPP_rHVzApGpKP [consulté le 14 février 2020]
+* [ Kube 50 ] Installing Istio in Kubernetes Cluster - YouTube. 15 août 2019. https://www.youtube.com/watch?v=WFu8OLXUETY&list=PL34sAs7_26wPkw9g-5NQPP_rHVzApGpKP [consulté le 14 février 2020]
 * What is Istio Service Mesh? - YouTube. 4 novembre 2019. https://www.youtube.com/watch?v=z6WjVJ1XelY [consulté le 17 février 2020]
 * kubectl Cheat Sheet - Kubernetes. 9 février 2020. https://kubernetes.io/docs/reference/kubectl/cheatsheet [consulté le 13 février 2020]
 * Learn Kubernetes Basics - Kubernetes. 26 octobre 2019. https://kubernetes.io/docs/tutorials/kubernetes-basics [consulté le 29 janvier 2020]
