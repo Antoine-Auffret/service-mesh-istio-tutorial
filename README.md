@@ -43,8 +43,7 @@
         2. [Enabling rate limit](#rateLimit)
         3. [Control headers and routing](#headers)
         4. [Denials and white/black listing](#listing)
-4. [Les code source et scripts élabore](#code)
-5. [Diapos de votre présentation en PDF](#diapo)
+4. [Références](#references)
 
 <a name="presentation"></a>
 
@@ -1444,10 +1443,17 @@ Il est possible d'utiliser un adaptateur de politiques pour manipuler les en-tê
 
 Istio peut contrôler l'accès à un service à l'aide de simples refus, d'une liste blanche ou noire basée sur des attributs ou d'une liste blanche ou noire basée sur IP. Plus d'informations : https://istio.io/docs/tasks/policy-enforcement/denial-and-list
 
-<a name="code"></a>
+<a name="references"></a>
 
-## 4) Les code source et scripts élabore.
+## 4) Références
 
-<a name="diapo"></a>
-
-## 5) Diapos de votre présentation en PDF.
+* Istio on GKE. 18 février 2020. https://cloud.google.com/istio/docs/istio-on-gke/overview [consulté le 1 février 2020]
+* Installing Istio on GKE. 19 février 2020. https://cloud.google.com/istio/docs/istio-on-gke/installing [consulté le 1 février 2020]
+* istio/istio: Connect, secure, control, and observe services. 19 février 2020. https://github.com/istio/istio [consulté le 13 février 2020]
+* Istio / Docs. 15 octobre 2019. https://istio.io/docs [consulté le 29 janvier 2020]
+  [ Kube 50 ] Installing Istio in Kubernetes Cluster - YouTube. 15 août 2019. https://www.youtube.com/watch?v=WFu8OLXUETY&list=PL34sAs7_26wPkw9g-5NQPP_rHVzApGpKP [consulté le 14 février 2020]
+* What is Istio Service Mesh? - YouTube. 4 novembre 2019. https://www.youtube.com/watch?v=z6WjVJ1XelY [consulté le 17 février 2020]
+* kubectl Cheat Sheet - Kubernetes. 9 février 2020. https://kubernetes.io/docs/reference/kubectl/cheatsheet [consulté le 13 février 2020]
+* Learn Kubernetes Basics - Kubernetes. 26 octobre 2019. https://kubernetes.io/docs/tutorials/kubernetes-basics [consulté le 29 janvier 2020]
+* What is Envoy — envoy 1.14.0-dev-29f6b9 documentation. 15 février 2020. https://www.envoyproxy.io/docs/envoy/latest/intro/what_is_envoy [consulté le 15 février 2020
+* Qu'est-ce qu'un Service Mesh ?. 18 février 2020. https://www.redhat.com/fr/topics/microservices/what-is-a-service-mesh [consulté le 18 février 2020]
