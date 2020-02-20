@@ -1,6 +1,6 @@
 # Service mesh with Istio : Tutoriel
 
-Tutoriel réalisé par Antoine Auffret et Emmanuel Sauvegrain dans le cardre du cours "8INF853 - Architecture des applications d'entreprise" présenté par Fabio Petrillo à l'UQAC.
+Tutoriel réalisé par Antoine Auffret et Emmanuel Sauvegrain dans le cadre du cours "8INF853 - Architecture des applications d'entreprise" présenté par Fabio Petrillo à l'UQAC.
 
 ## Sommaire
 
@@ -24,27 +24,27 @@ Tutoriel réalisé par Antoine Auffret et Emmanuel Sauvegrain dans le cardre du 
     3. [Vérification de l'installation et configuration du cluster Kubernetes](#verificationCluster)
     4. [Installation d'Istio](#installationIstio)
     5. [Installation d'une application avec Istio](#installationBookinfo)
-    6. [Traffic management](#traffic)
-        1. [Request routing](#routing)
-        2. [Fault injection](#fault)
-        3. [Traffic shifting](#shifting)
-        4. [Request timeouts](#timeout)
-        5. [Circuit breaker](#breaker)
-        6. [Mirroring](#mirroring)
-    7. [Observability](#observability)
-        1. [Metrics](#metrics)
-        2. [Logs](#logs)
-        3. [Distributed tracing](#tracing)
-        4. [Visualizing your mesh](#visualizing)
-    8. [Security](#security)
-        1. [Authentication with mutual TLS (mTLS)](#mtls)
-        2. [Citadel configuration](#citadel)
-        3. [Authorization](#authorization)
-    9. [Policies](#policies)
-        1. [Enabling policy enforcement](#enablePolicy)
-        2. [Enabling rate limit](#rateLimit)
-        3. [Control headers and routing](#headers)
-        4. [Denials and white/black listing](#listing)
+    6. [Gestion du trafic](#trafic)
+        1. [Routage des requêtes](#routage)
+        2. [Injection de fautes](#fautes)
+        3. [Déplacement du trafic](#deplacement)
+        4. [Délai d'expiration des requêtes](#expiration)
+        5. [Disjoncteur](#disjoncteur)
+        6. [Mise en miroir du trafic](#miroir)
+    7. [Observabilité](#observabilite)
+        1. [Métriques](#metriques)
+        2. [Journaux](#journaux)
+        3. [Traçage distribué](#tracage)
+        4. [Visualiser votre maillage](#visualiser)
+    8. [Sécurité](#securite)
+        1. [Authentification avec TLS mutuelle (mTLS)](#mtls)
+        2. [Configuration Citadel](#citadel)
+        3. [Autorisation](#autorisation)
+    9. [Politiques](#politiques)
+        1. [Activation de l'application de la politique](#activationPolitques)
+        2. [Activation de la limite de trafic](#limite)
+        3. [Contrôler les en-têtes et le routage](#en-tete)
+        4. [Refus et liste blanche/noire](#liste)
 4. [Références](#references)
 
 <a name="presentation"></a>
@@ -528,11 +528,11 @@ destinationrule.networking.istio.io/details created
 > Remarque : l'application bookinfo utilise un load balancer pour les 3 microservices `reviews`, il suffit de rafraîchir plusieurs fois la page pour voir que les système de notation diffère d'un microservice à un autre (pas d'étoile, étoiles noires ou étoiles rouges). Cela permet à Istio de rediriger le traffic vers différents microservices selon des règles préétablies. En effet, sans une version de service par défaut explicite vers laquelle acheminer, Istio achemine les demandes vers toutes les versions disponibles (v1, v2 et v3) de manière circulaire. C'est l'une des fonctionnalités principales d'Istio le "**traffic management**" que l'on verra plus loin dans ce tutoriel (https://istio.io/docs/concepts/traffic-management)
 
 ------
-<a name="traffic"></a>
-### Traffic management
+<a name="trafic"></a>
+### Gestion du trafic
 
-<a name="routing"></a>
-#### Request Routing
+<a name="routage"></a>
+#### Routage des requêtes
 
 Les services virtuels achemineront tout le trafic vers la v1 du système d'avis `reviews` de chaque microservice. Exécutez la commande suivante pour appliquer les services virtuels.
 ```bash
@@ -581,8 +581,8 @@ virtualservice.networking.istio.io "details" deleted
 > Remarque : il est aussi possible de filtrer l'accès aux microservices en fonction des informations provenant de l'entête HTTP de l'utilisateur (comme le type de navigateur ou en fonction du nom de l'utilisateur). Pour plus d'information : https://istio.io/docs/tasks/traffic-management/request-routing
 
 ------
-<a name="fault"></a>
-#### Fault Injection
+<a name="fautes"></a>
+#### Injection de fautes
 
 Nous allons maintenant volontairement créer une "fault injection" avec la configuration ci-dessous :
 * productpage => reviews:v2 => ratings (seulement pour l'utilisateur jason) + HTTP 500
@@ -605,14 +605,14 @@ $ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-al
 ```
 
 ------
-<a name="shifting"></a>
-#### Traffic shifting
+<a name="deplacement"></a>
+#### Déplacement du trafic
 
 Il est possible de migrer progressivement le trafic (HTTP ou TCP) d'une version d'un microservice à une autre. Cela peut être très utile pour la montée de version d'une application. Plus d'informations : https://istio.io/docs/tasks/traffic-management/traffic-shifting et https://istio.io/docs/tasks/traffic-management/tcp-traffic-shifting
 
 ------
-<a name="timeout"></a>
-#### Request timeout
+<a name="expiration"></a>
+#### Délai d'expiration des requêtes
 
 Redirection de tout le traffic vers la version 1 de `reviews`
 ```bash
@@ -692,25 +692,24 @@ $ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-al
 ```
 
 ------
-<a name="breaker"></a>
-#### Circuit breaker
+<a name="disjoncteur"></a>
+#### Disjoncteur
 
 Istio est capable d'implémenter un coupe circuit (circuit breaker). Les disjoncteurs existent pour empêcher les opérations plutôt que de les réexécuter quand le système n'est pas en bonne santé. Plus d'informations : https://istio.io/docs/tasks/traffic-management/circuit-breaking
 
 ------
-<a name="mirroring"></a>
-#### Traffic mirroring
+<a name="miroir"></a>
+#### Mise en miroir du trafic
 
 La mise en miroir du trafic (traffic mirroring), est un concept qui permet aux équipes d'apporter des modifications à la production avec le moins de risques possible. La mise en miroir envoie une copie du trafic en direct à un service en miroir. Le trafic en miroir se produit en dehors du chemin critique des requêtes pour le service principal. Plus d'information : https://istio.io/docs/tasks/traffic-management/mirroring
 
-<a name="observability"></a>
-### Observability
+<a name="observabilite"></a>
+### Observabilité
 
 L'observabilté d'Istio permet de récupérer de la télémétrie prevenant du mesh comme des métriques, des logs, des traces et intègre des outils puissants pour la surveillance du service de maillage (Prometheus, Grafana, Kiali, Fluentd, Jaeger, Zipkin et plein d'autres).
 
-<a name="metrics"></a>
-
-#### Metrics
+<a name="metriques"></a>
+#### Métriques
 
 Cette partie du tutoriel vous présente la configuration, la collecte et le traitement des métriques pour le mesh d'Istio.
 
@@ -775,9 +774,8 @@ Pour tester son fonctionnement sur le cluster en cliquant sur le lien dans un na
 > `Ctrl-C` pour terminer Grafana.
 
 -----
-<a name="logs"></a>
-
-#### Logs
+<a name="journaux"></a>
+#### Journaux
 
 ##### Collecte de logs
 
@@ -1057,9 +1055,8 @@ $ kubectl -n logging port-forward service/kibana 5061:5601
 > Ctrl-C pour quitter la redirection de port
 
 -----
-<a name="tracing"></a>
-
-#### Distributed tracing
+<a name="tracage"></a>
+#### Traçage distribué
 
 Le suivi distribué permet aux utilisateurs de suivre une demande à travers le mesh qui est distribué sur plusieurs services. Cela permet une compréhension plus approfondie de la latence des demandes, de la sérialisation et du parallélisme via la visualisation.
 
@@ -1087,8 +1084,8 @@ Cliquer sur la dernière trace pour voir plus de détail comme les différentes 
 ![](img/jaegerTrace.png)
 
 -----
-<a name="tracing"></a>
-#### Visualizing your mesh
+<a name="visualiser"></a>
+#### Visualiser votre maillage
 
 Pour visualiser le service mesh Istio, vous pouvez utiliser Kiali (installé de base avec grafana dans le profil demo). Kiali (https://kiali.io/) est un outil de visualisation de l'observabilité du maillage de service et configuration pour Istio. L'onglet "Graph" permet de visualiser en temps réel l'état du maillage de service et le traffic pour chaque microservices.
 
@@ -1102,8 +1099,8 @@ http://localhost:45465/kiali
 
 > `Ctrl-C` pour terminer kiali.
 
-<a name="security"></a>
-### Security
+<a name="securite"></a>
+### Securité
 
 Les fonctionnalités de sécurité d'Istio offrent une identité forte, une politique puissante, un cryptage TLS transparent et des outils d'authentification, d'autorisation et d'audit (AAA) pour protéger les services et les données. Les objectifs de la sécurité d'Istio sont :
 * Sécurité par défaut : aucune modification nécessaire pour le code d'application et l'infrastructure
@@ -1123,7 +1120,7 @@ La sécurité dans Istio implique plusieurs composants :
 
 <a name="mtls"></a>
 
-#### Authentication with mutual TLS (mTLS)
+#### Authentification avec TLS mutuelle (mTLS)
 Vous pouvez appliquer une politique de sécurité à des services spécifiques ou vous pouvez l'appliquer à une étendue plus large, par exemple, à tous les services dans un namespace ou au mesh complet.
 mTLS possède deux modes : `PERMISSIVE` ou `STRICT`.
 Le mode `PERMISSIVE` permet le trafic en clair ou encrypté tandis que le mode `STRICT` autorise seulement le trafic encrypté. `PERMISSIVE` est le mode par défaut dans le profil "demo" de Istio.
@@ -1251,7 +1248,7 @@ $ kubectl delete nanespace foo bar legacy
 
 -----
 <a name="citadel"></a>
-#### Citadel configuration
+#### Configuration Citadel
 
 Il est possible de configurer Citadel des certificats provenant d'autorités de certifications externes.
 
@@ -1260,8 +1257,8 @@ Par défaut, Citadel génère un certificat racine et une clé auto-signés et l
 Vous pouvez activer la fonction de vérification de l'intégrité de Citadel pour détecter les échecs du service Citadel CSR (Certificate Signing Request). Lorsqu'une défaillance est détectée, Kubelet redémarre automatiquement le conteneur Citadel. Plus d'information : https://istio.io/docs/tasks/security/citadel-config/health-check
 
 -----
-<a name="authorization"></a>
-#### Authorization
+<a name="autorisation"></a>
+#### Autorisation
 
 Il est possible de mettre en place des contrôles d'accès avec Istio. La première étape est d'appliquer une politique `deny-all` qui aura pour conséquence de rejeter toutes les requêtes. Il faudra ensuite accorder plus d'accès graduellement.
 
@@ -1380,13 +1377,11 @@ $ kubectl delete authorizationpolicy.security.istio.io/ratings-viewer
 
 Il est aussi possible de limiter les accès pour le trafic TCP, pour les groupes, les listes et plus. Plus d'informations : https://istio.io/docs/tasks/security/authorization
 
-<a name="policies"></a>
+<a name="politiques"></a>
+### Politiques
 
-### Policies
-
-<a name="enablePolicy"></a>
-
-#### Enabling policy enforcement
+<a name="activationPolitiques"></a>
+#### Activation de l'application de la politique
 
 Par défaut, lors de l’installation du profil "demo" les politiques (policies) sont activées, vous pouvez le vérifier avec la commande suivante
 
@@ -1402,9 +1397,8 @@ $ istioctl manifest apply --set values.global.disablePolicyChecks=false
 ```
 
 -----
-<a name="rateLimit"></a>
-
-#### Enabling rate limit
+<a name="limite"></a>
+#### Activation de la limite de trafic
 
 Avec Istio, vous pouvez limiter dynamiquement le trafic vers un service. Vous aller appliquer des politiques permettant de limiter l'accès à l'application bookinfo grâce à des quotas.
 
@@ -1432,16 +1426,14 @@ $ kubectl delete -f ~/istio-1.4.5/samples/bookinfo/networking/virtual-service-al
 ```
 
 -----
-<a name="headers"></a>
-
-#### Control headers and routing
+<a name="en-tete"></a>
+#### Contrôler les en-têtes et le routage
 
 Il est possible d'utiliser un adaptateur de politiques pour manipuler les en-têtes des requêtes HTTP et de routage. Plus d'informations : https://istio.io/docs/tasks/policy-enforcement/control-headers
 
 -----
-<a name="listing"></a>
-
-#### Denials and white/black listing
+<a name="liste"></a>
+#### Refus et liste blanche/noire
 
 Istio peut contrôler l'accès à un service à l'aide de simples refus, d'une liste blanche ou noire basée sur des attributs ou d'une liste blanche ou noire basée sur IP. Plus d'informations : https://istio.io/docs/tasks/policy-enforcement/denial-and-list
 
