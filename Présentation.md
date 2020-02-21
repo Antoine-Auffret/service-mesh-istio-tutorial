@@ -108,5 +108,14 @@
   
   <p>Istio est une solution qui se base sur une application d’orchestration de conteneur, dont les dernières versions supportent Kubernetes qui est la plus connue et Nomad fonctionnant avec Consul. (Pour prendre l’exemple de Kubernetes, une application d’orchestration de conteneur, permet de gérer un réseau ou un parc de multiples services. Son rôle est de d’automatiser les déploiements de nouvelles instances via les conteneurs, mais aussi la mise à l’échelle en fonctions des besoins du réseau, et la gestion de applications et service des manières générales par le biais des conteneurs. Une solution comme Kubernetes est donc obligatoire au fonctionnement d’Istio, et permet d’adapter les ressources du serveur correspondants au conteneur de services, en fonction des besoins de l’architecture. L’un des principaux objectifs d’Istio reste toutefois de fonctionner qu’importe l’application d’orchestration de conteneur, et malgré le fait que Kubernetes soit aujourd’hui la plus connues, elle n’est pas une obligation, à l’inverse de la solution Envoy qui gère les proxy sidecars.</p>
   
+ ----------- CONCLUSION -----------------
+ 
+Les services mesh sont une technologie assez récente permettant de mieux gérer les grandes applications de microservices. Cette technologie se traduit par l’ajout d’une couche applicative dédiée sur une plateforme d’orchestration de microservices, dont elle est indépendante.  Un service mesh permet de récolter l’information d’un réseau et de la contrôler, sans toucher aux codes des services, et cela de manière simple et rapide. La solution de maillage de service la plus connue aujourd’hui est Istio, permettant l’observabilité, la sécurité, la gestion du trafic et la configuration de politiques de communications.
+La solution Istio est répartie en deux couches, la première étant la couche de données qui collecte les informations grâce aux proxys Envoy. Et la seconde est la couche de contrôle permettant de gérer l’ensemble du parc.
+Istio est une solution open source, stable et efficace malgré sa création récente. Toutefois les technologies de maillages de services, seront amenées à évoluer et se développé de plus en plus dans les années à venir, apportant de nouvelles fonctionnalités, afin d’optimiser et gérer au mieux, les réseaux de grandes tailles.
+
+  
+  
+  
 </ol>
 </div>
