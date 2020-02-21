@@ -549,7 +549,7 @@ virtualservice.networking.istio.io/ratings created
 virtualservice.networking.istio.io/details created
 ```
 
-Sur l'interface Kiali, vous pouvez voir progressivement que les requêtes sont redirigées uniquement sur la v1 de `reviews`.
+Sur l'interface Kiali (voir [Visualiser votre maillage](#visualiser)), vous pouvez voir progressivement que les requêtes sont redirigées uniquement sur la v1 de `reviews`.
 
 ![](img/kialiGraphDashboardV1All.png)
 
@@ -1455,5 +1455,5 @@ Istio peut contrôler l'accès à un service à l'aide de simples refus, d'une l
 * What is Istio Service Mesh? - YouTube. 4 novembre 2019. https://www.youtube.com/watch?v=z6WjVJ1XelY [consulté le 17 février 2020]
 * kubectl Cheat Sheet - Kubernetes. 9 février 2020. https://kubernetes.io/docs/reference/kubectl/cheatsheet [consulté le 13 février 2020]
 * Learn Kubernetes Basics - Kubernetes. 26 octobre 2019. https://kubernetes.io/docs/tutorials/kubernetes-basics [consulté le 29 janvier 2020]
-* What is Envoy — envoy 1.14.0-dev-29f6b9 documentation. 15 février 2020. https://www.envoyproxy.io/docs/envoy/latest/intro/what_is_envoy [consulté le 15 février 2020
+* What is Envoy — envoy 1.14.0-dev-29f6b9 documentation. 15 février 2020. https://www.envoyproxy.io/docs/envoy/latest/intro/what_is_envoy [consulté le 15 février 2020]
 * Qu'est-ce qu'un Service Mesh ?. 18 février 2020. https://www.redhat.com/fr/topics/microservices/what-is-a-service-mesh [consulté le 18 février 2020]
